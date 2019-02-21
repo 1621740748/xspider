@@ -1,4 +1,4 @@
-package fund.jrj.com.xspider;
+package fund.jrj.com.xspider.constants;
 
 public class DBConfig {
     public static String driverClassName = "com.mysql.jdbc.Driver";

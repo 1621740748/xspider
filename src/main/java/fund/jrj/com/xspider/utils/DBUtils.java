@@ -1,9 +1,11 @@
-package fund.jrj.com.xspider;
+package fund.jrj.com.xspider.utils;
 
 import javax.sql.DataSource;
 
 import org.jfaster.mango.datasource.DriverManagerDataSource;
 import org.jfaster.mango.operator.Mango;
+
+import fund.jrj.com.xspider.constants.DBConfig;
 
 public class DBUtils {
 	private static Mango mango=null;
