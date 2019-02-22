@@ -43,7 +43,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  *
  * @author hu
  */
-public class JrjSeleniumCrawler {
+public class JRJSeleniumCrawler {
   static {
   //禁用Selenium的日志
   Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
@@ -71,7 +71,7 @@ public class JrjSeleniumCrawler {
         DBManager manager = new RocksDBManager("crawl");
         //创建一个Crawler需要有DBManager和Executor
         List<String> seeds= FileUtils.readLines(
-        		new File(JrjSeleniumCrawler.class.getResource("").getPath()+"fund_seed2.txt")
+        		new File(JRJSeleniumCrawler.class.getResource("").getPath()+"fund_seed2.txt")
         		,"utf-8");
         Crawler crawler = new Crawler(manager, executor);
         for(String seed:seeds) {
