@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import cn.edu.hfut.dmic.webcollector.crawldb.DBManager;
 import cn.edu.hfut.dmic.webcollector.crawler.Crawler;
@@ -42,6 +44,11 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  * @author hu
  */
 public class JrjSeleniumCrawler {
+  static {
+  //禁用Selenium的日志
+  Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
+  logger.setLevel(Level.OFF);
+}
 
 
     public static void main(String[] args) throws Exception {
