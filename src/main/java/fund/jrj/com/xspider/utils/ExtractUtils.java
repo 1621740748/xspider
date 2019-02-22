@@ -1,9 +1,12 @@
 package fund.jrj.com.xspider.utils;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
@@ -11,8 +14,12 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import fund.jrj.com.xspider.bo.PageLink;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class ExtractUtils {
+	public static Map<String,Boolean>hostHttpsMap=new HashMap<>();
 	private static String getBaseURL(String url) {
 		try {
 			URL u=new URL(url);
@@ -32,6 +39,9 @@ public class ExtractUtils {
 		if(uri==null) {
 			return "";
 		}
+		if(uri.startsWith("javascript")) {
+			return "";
+		}
 		if(uri.startsWith("//")) {
 			return "http:"+uri;
 		}
@@ -43,10 +53,32 @@ public class ExtractUtils {
 		}
 		return base+"/"+uri;
 	}
+	private static void checkHttpsHost(String url,String host,PageLink pl) {
+		if(hostHttpsMap.containsKey(host)) {
+			if(hostHttpsMap.get(host)) {
+				pl.setHttpsEnable(1);
+			}else {
+				pl.setHttpsEnable(0);
+			}
+			return;
+		}
+		OkhttpUtils.getInstance().doGet(url, new Callback() {
+			@Override
+			public void onFailure(Call call, IOException e) {
+				pl.setHttpsEnable(0);
+				hostHttpsMap.put(host, false);
+			}
+			@Override
+			public void onResponse(Call call, Response response) throws IOException {
+				pl.setHttpsEnable(1);
+				hostHttpsMap.put(host, true);
+			}
+		});
+	}
 	private static void addUrl(List<PageLink> result, List<WebElement>webElements ,Integer pageType,String base,String parentUrl) {
 		for(WebElement we:webElements) {
 			PageLink p=new PageLink();
-			p.setPageType(PageTypeEnum.CSS.getPageType());
+			p.setPageType(pageType);
 			String u=we.getAttribute("href");
 			if(u!=null&&u.startsWith("//")) {
 				p.setAutoAdapt(1);
@@ -60,6 +92,50 @@ public class ExtractUtils {
 			System.out.println(linkUrl);
 			result.add(p);
 		}
+	}
+	private static String getHost(String url) {
+		try {
+			return new URL(url).getHost();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+	private static boolean isJRJHost(String host) {
+		if(host.endsWith(".jrj.com.cn")
+		||host.endsWith(".jrjimg.cn")
+		) {
+			return true;
+		}
+		return false;
+	}
+	private static void checkExistHttp(final PageLink pl) {
+		//检查host是否jrj域名
+		String host=getHost(pl.getLinkUrl());
+		boolean flag=isJRJHost(host);
+		//不检查http页面是否
+		if(pl.getPageType()==PageTypeEnum.HTML.getPageType()&&!flag){
+			return;
+		}
+		if(pl.getLinkUrl().startsWith("http://")) {
+			//检查http支持情况以及是否包含http写死的情况
+			OkhttpUtils.getInstance().doGet(pl.getLinkUrl(), new Callback() {
+				@Override
+				public void onFailure(Call call, IOException e) {
+					pl.setHttpEnable(0);
+				}
+				@Override
+				public void onResponse(Call call, Response response) throws IOException {
+					pl.setHttpEnable(1);
+				}
+				
+			});
+			//检查时候支持https
+			String url=pl.getLinkUrl().replace("http://", "https://");	
+			checkHttpsHost(url,host,pl);
+			
+		}
+		
 	}
 	public static List<PageLink> extractLinks(String url){
 		String base=getBaseURL(url);
