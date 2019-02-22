@@ -8,6 +8,7 @@ public class PageLink {
     private String linkUrl;
     private String linkParentUrl;
     private Integer pageType;
+    private Integer autoAdapt;
     private Integer httpsEnable;
     private Integer httpEnable;
     private Integer httpExist;
@@ -59,6 +60,12 @@ public class PageLink {
 	}
 	public void setHttpExistContent(String httpExistContent) {
 		this.httpExistContent = httpExistContent;
+	}
+	public Integer getAutoAdapt() {
+		return autoAdapt;
+	}
+	public void setAutoAdapt(Integer autoAdapt) {
+		this.autoAdapt = autoAdapt;
 	}
     
     

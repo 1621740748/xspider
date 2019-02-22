@@ -17,16 +17,23 @@
  */
 package fund.jrj.com.xspider;
 
+import java.io.File;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import cn.edu.hfut.dmic.webcollector.crawldb.DBManager;
 import cn.edu.hfut.dmic.webcollector.crawler.Crawler;
 import cn.edu.hfut.dmic.webcollector.fetcher.Executor;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
-import java.util.List;
-
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import fund.jrj.com.xspider.bo.PageLink;
+import fund.jrj.com.xspider.constants.PageTypeEnum;
+import fund.jrj.com.xspider.dao.PageLinkDao;
+import fund.jrj.com.xspider.utils.DBUtils;
+import fund.jrj.com.xspider.utils.ExtractUtils;
 
 
 /**
@@ -41,24 +48,32 @@ public class JrjSeleniumCrawler {
         Executor executor = new Executor() {
             @Override
             public void execute(CrawlDatum datum, CrawlDatums next) throws Exception {
-                
-                HtmlUnitDriver driver = new HtmlUnitDriver();
-                driver.setJavascriptEnabled(true);
-                
-                driver.get(datum.url());
-                
-                List<WebElement> elementList = driver.findElementsByCssSelector("h3.vrTitle a");
-                for(WebElement element:elementList){
-                    System.out.println("title:"+element.getText());
+                List<PageLink> links=ExtractUtils.extractLinks(datum.url());
+                for(PageLink pl:links) {
+                	if(pl.getPageType()==PageTypeEnum.HTML.getPageType()) {
+                		if(pl.getLinkUrl().startsWith("http://fund.jrj.com.cn")) {
+                			next.add(pl.getLinkUrl());
+                		}
+                	}
                 }
+            	PageLinkDao plDao=DBUtils.getInstance().create(PageLinkDao.class);
+            	plDao.add(links);
             }
         };
-
         //创建一个基于伯克利DB的DBManager
         DBManager manager = new RocksDBManager("crawl");
         //创建一个Crawler需要有DBManager和Executor
+        List<String> seeds= FileUtils.readLines(
+        		new File(JrjSeleniumCrawler.class.getResource("").getPath()+"fund_seed2.txt")
+        		,"utf-8");
         Crawler crawler = new Crawler(manager, executor);
-        crawler.addSeed("https://www.sogou.com/web?query=%E6%B7%98%E5%AE%9D");
+        for(String seed:seeds) {
+        	if(StringUtils.isNotBlank(seed)) {
+        		crawler.addSeed(seed);
+        	}
+        }
+        crawler.setThreads(5);
+        crawler.getConf().setExecuteInterval(200);
         crawler.start(1);
     }
 
