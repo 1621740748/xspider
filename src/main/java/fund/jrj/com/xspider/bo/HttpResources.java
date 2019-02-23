@@ -1,6 +1,9 @@
 package fund.jrj.com.xspider.bo;
 
+import org.jfaster.mango.annotation.ID;
+
 public class HttpResources {
+	@ID
 	private Integer linkId;
 	private String linkUrl;
 	private String linkHost;
