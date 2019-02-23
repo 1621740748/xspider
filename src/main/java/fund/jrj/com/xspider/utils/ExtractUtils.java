@@ -100,6 +100,7 @@ public class ExtractUtils {
 			p.setLinkUrl(linkUrl);
 			p.setLinkParentUrl(parentUrl);
 			System.out.println(linkUrl);
+			checkExistHttp(p);
 			result.add(p);
 		}
 	}
