@@ -244,9 +244,10 @@ public class ExtractUtils {
 					&& (p.getAutoAdapt() == null || p.getAutoAdapt() == 0)) {
 				httpAbs.add(p);
 			}
-			protocalCheckExecutor.submit(new HostProtocalCheck(p));
 		}
-
+		for(PageLink http:httpAbs) {
+			protocalCheckExecutor.submit(new HostProtocalCheck(http));
+		}
 		result.addAll(htmlList);
 		PageLink p = new PageLink();
 		p.setAutoAdapt(0);
