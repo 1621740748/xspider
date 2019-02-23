@@ -80,8 +80,12 @@ public class JRJSeleniumCrawler {
         				ExtractUtils.checkJscssExistHttp(pl);
         			}
         			// 检查是否支持https
-        			String url = pl.getLinkUrl().replace("http://", "https://");
-        			ExtractUtils.checkHttpsHost(url, host, pl);
+        			if(pl.getLinkUrl().startsWith("http://")) {
+        				String url = pl.getLinkUrl().replace("http://", "https://");
+        				ExtractUtils.checkHttpsHost(url, host, pl);
+        			}else {
+        				pl.setHttpsEnable(1);
+        			}
                 }
             	PageLinkDao plDao=DBUtils.getInstance().create(PageLinkDao.class);
             	plDao.add(links);
