@@ -7,10 +7,9 @@ public class PageLink {
     private Integer linkId;
     private String linkUrl;
     private String linkParentUrl;
+    private String linkHost;
     private Integer pageType;
     private Integer autoAdapt;
-    private Integer httpsEnable;
-    private Integer httpEnable;
     private Integer httpExist;
     private String httpExistContent;
 	public Integer getLinkId() {
@@ -37,18 +36,6 @@ public class PageLink {
 	public void setPageType(Integer pageType) {
 		this.pageType = pageType;
 	}
-	public Integer getHttpsEnable() {
-		return httpsEnable;
-	}
-	public void setHttpsEnable(Integer httpsEnable) {
-		this.httpsEnable = httpsEnable;
-	}
-	public Integer getHttpEnable() {
-		return httpEnable;
-	}
-	public void setHttpEnable(Integer httpEnable) {
-		this.httpEnable = httpEnable;
-	}
 	public Integer getHttpExist() {
 		return httpExist;
 	}
@@ -66,6 +53,12 @@ public class PageLink {
 	}
 	public void setAutoAdapt(Integer autoAdapt) {
 		this.autoAdapt = autoAdapt;
+	}
+	public String getLinkHost() {
+		return linkHost;
+	}
+	public void setLinkHost(String linkHost) {
+		this.linkHost = linkHost;
 	}
     
     
