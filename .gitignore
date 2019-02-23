@@ -1,5 +1,6 @@
 target/
 crawl/
+jscss/
 .classpath
 .project
 .settings/
