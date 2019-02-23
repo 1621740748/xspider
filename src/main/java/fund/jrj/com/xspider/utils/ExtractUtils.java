@@ -154,15 +154,53 @@ public class ExtractUtils {
 				@Override
 				public void onResponse(Call call, Response response) throws IOException {
 					pl.setHttpEnable(1);
-					String contentType=response.body().contentType().type();
-					//String httpsContent=response.body().contentType();
+					if(pl.getPageType()==PageTypeEnum.CSS.getPageType()
+							||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
+						String body=response.body().string();
+						String https=findHttpAbs(body);
+						if(StringUtils.isNotBlank(https)) {
+							pl.setHttpExist(1);
+							pl.setHttpExistContent(https);
+						}else {
+							pl.setHttpExist(0);
+							pl.setHttpExistContent("");
+							
+						}
+					}
 				}
 
 			});
 			// 检查时候支持https
 			String url = pl.getLinkUrl().replace("http://", "https://");
 			checkHttpsHost(url, host, pl);
+		}
+		else if (pl.getLinkUrl().startsWith("https://")) {
+			// 检查http支持情况以及是否包含http写死的情况
+			OkhttpUtils.getInstance().doGet(pl.getLinkUrl(), new Callback() {
+				@Override
+				public void onFailure(Call call, IOException e) {
+					pl.setHttpsEnable(0);
+				}
 
+				@Override
+				public void onResponse(Call call, Response response) throws IOException {
+					pl.setHttpsEnable(1);
+					if(pl.getPageType()==PageTypeEnum.CSS.getPageType()
+							||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
+						String body=response.body().string();
+						String https=findHttpAbs(body);
+						if(StringUtils.isNotBlank(https)) {
+							pl.setHttpExist(1);
+							pl.setHttpExistContent(https);
+						}else {
+							pl.setHttpExist(0);
+							pl.setHttpExistContent("");
+							
+						}
+					}
+				}
+
+			});
 		}
 
 	}

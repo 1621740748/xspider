@@ -12,7 +12,7 @@ import okhttp3.Response;
 public class TestOkHttp {
 
 	public static void main(String[] args) {
-		String url="http://fund.jrj.com.cn";
+		String url = "http://fund.jrj.com.cn";
 		OkhttpUtils.getInstance().doGet(url, new Callback() {
 			@Override
 			public void onFailure(Call call, IOException e) {
@@ -21,12 +21,12 @@ public class TestOkHttp {
 			@Override
 			public void onResponse(Call call, Response response) throws IOException {
 				System.out.println(response.code());
-				System.out.println(response.body().string());
 				System.out.println(JSON.toJSONString(response));
+
 			}
 
 		});
-		
+
 	}
 
 }

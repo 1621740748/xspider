@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.rocksdb.RocksDB;
 
 import cn.edu.hfut.dmic.webcollector.crawldb.DBManager;
 import cn.edu.hfut.dmic.webcollector.crawler.Crawler;
@@ -31,6 +32,7 @@ import cn.edu.hfut.dmic.webcollector.fetcher.Executor;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
+import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBUtils;
 import fund.jrj.com.xspider.bo.PageLink;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
 import fund.jrj.com.xspider.dao.PageLinkDao;
@@ -69,6 +71,7 @@ public class JRJSeleniumCrawler {
         };
         //创建一个基于伯克利DB的DBManager
         DBManager manager = new RocksDBManager("crawl");
+        
         //创建一个Crawler需要有DBManager和Executor
         List<String> seeds= FileUtils.readLines(
         		new File(JRJSeleniumCrawler.class.getResource("").getPath()+"fund_seed2.txt")
