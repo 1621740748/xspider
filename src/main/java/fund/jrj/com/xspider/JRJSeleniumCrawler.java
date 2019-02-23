@@ -57,6 +57,9 @@ public class JRJSeleniumCrawler {
         Executor executor = new Executor() {
             @Override
             public void execute(CrawlDatum datum, CrawlDatums next) throws Exception {
+            	if(datum==null||datum.url()==null) {
+            		return;
+            	}
                 List<PageLink> links=ExtractUtils.extractLinks(datum.url());
                 for(PageLink pl:links) {
                 	if(pl.getPageType()==PageTypeEnum.HTML.getPageType()) {

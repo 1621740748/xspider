@@ -200,8 +200,12 @@ public class ExtractUtils {
 		return StringUtils.strip(result, "\n");
 	}
 	public static List<PageLink> extractLinks(String url) {
-		String base = getBaseURL(url);
 		List<PageLink> result = new LinkedList<>();
+		if(StringUtils.isBlank(url)) {
+			return result;
+		}
+		String base = getBaseURL(url);
+
 		HtmlUnitDriver driver = new HtmlUnitDriver();
 		driver.setJavascriptEnabled(true);
 		driver.get(url);
@@ -241,6 +245,7 @@ public class ExtractUtils {
 			p.setHttpExist(0);
 		}
 		result.add(p);
+
 		return result;
 	}
 }
