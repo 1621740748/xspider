@@ -61,7 +61,8 @@ public class JRJSeleniumCrawler {
                 for(PageLink pl:links) {
                 	if(pl.getPageType()==PageTypeEnum.HTML.getPageType()) {
                 		if(pl.getLinkUrl().startsWith("http://fund.jrj.com.cn")
-                			&&!pl.getLinkUrl().toLowerCase().endsWith(".pdf")	) {
+                			&&!pl.getLinkUrl().toLowerCase().endsWith(".pdf")
+                			&&!pl.getLinkUrl().toLowerCase().endsWith(".mp4")) {
                 			next.add(pl.getLinkUrl());
                 		}
                 	}

@@ -102,10 +102,6 @@ public class ExtractUtils {
 			if (u != null && u.startsWith("//")) {
 				p.setAutoAdapt(1);
 			}
-			//有图片地址写死http的情况
-			if(u!=null&&u.startsWith("http://")) {
-				p.setHttpExist(1);
-			}
 			String linkUrl = getAbsUrl(base, u);
 			if (StringUtils.isBlank(linkUrl)) {
 				continue;
@@ -113,7 +109,18 @@ public class ExtractUtils {
 			p.setLinkUrl(linkUrl);
 			p.setLinkParentUrl(parentUrl);
 			System.out.println(linkUrl);
-			checkExistHttp(p);
+			// 检查host是否jrj域名
+			String host = getHost(p.getLinkUrl());
+//			boolean flag = isJRJHost(host);
+			// 不检查http页面是否
+			if (p.getPageType() == PageTypeEnum.CSS.getPageType()
+					||p.getPageType()==PageTypeEnum.JS.getPageType()) {
+				//检查资源是否包含http写死的情况
+				checkJscssExistHttp(p);
+			}
+			// 检查是否支持https
+			String url = p.getLinkUrl().replace("http://", "https://");
+			checkHttpsHost(url, host, p);
 			result.add(p);
 		}
 	}
@@ -151,14 +158,11 @@ public class ExtractUtils {
 		}
 	}
 
-	private static void checkExistHttp(final PageLink pl) {
-		// 检查host是否jrj域名
-		String host = getHost(pl.getLinkUrl());
-		boolean flag = isJRJHost(host);
-		// 不检查http页面是否
-		if (pl.getPageType() == PageTypeEnum.HTML.getPageType() && !flag) {
-			return;
-		}
+	/**
+	 * 检查资源链接内容是否包含http
+	 * @param pl
+	 */
+	private static void checkJscssExistHttp(final PageLink pl) {
 		//检查是否已经分析过该资源
 		String value=RockUtils.get(pl.getLinkUrl());
 		if(StringUtils.isNotBlank(value)) {
@@ -169,7 +173,6 @@ public class ExtractUtils {
 			pl.setHttpExistContent(temp.getHttpExistContent());
 			return;
 		}
-		if (pl.getLinkUrl().startsWith("http://")) {
 			// 检查http支持情况以及是否包含http写死的情况
 			OkhttpUtils.getInstance().doGet(pl.getLinkUrl(), new Callback() {
 				@Override
@@ -190,40 +193,7 @@ public class ExtractUtils {
 						}else {
 							pl.setHttpExist(0);
 							pl.setHttpExistContent("");
-							
-						}
-					}
-					RockUtils.put(pl.getLinkUrl(), JSON.toJSONString(pl));
-					response.close();
-				}
-				
-			});
-			// 检查时候支持https
-			String url = pl.getLinkUrl().replace("http://", "https://");
-			checkHttpsHost(url, host, pl);
-		}
-		else if (pl.getLinkUrl().startsWith("https://")) {
-			// 检查http支持情况以及是否包含http写死的情况
-			OkhttpUtils.getInstance().doGet(pl.getLinkUrl(), new Callback() {
-				@Override
-				public void onFailure(Call call, IOException e) {
-					pl.setHttpsEnable(0);
-				}
 
-				@Override
-				public void onResponse(Call call, Response response) throws IOException {
-					pl.setHttpsEnable(1);
-					if(pl.getPageType()==PageTypeEnum.CSS.getPageType()
-							||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
-						String body=response.body().string();
-						String https=findHttpAbs(body);
-						if(StringUtils.isNotBlank(https)) {
-							pl.setHttpExist(1);
-							pl.setHttpExistContent(https);
-						}else {
-							pl.setHttpExist(0);
-							pl.setHttpExistContent("");
-							
 						}
 					}
 					RockUtils.put(pl.getLinkUrl(), JSON.toJSONString(pl));
@@ -231,7 +201,6 @@ public class ExtractUtils {
 				}
 
 			});
-		}
 
 	}
 
