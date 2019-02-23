@@ -102,6 +102,8 @@ public class ExtractUtils {
 			}
 			if (u != null && u.startsWith("//")) {
 				p.setAutoAdapt(1);
+			}else {
+				p.setAutoAdapt(0);
 			}
 			String linkUrl = getAbsUrl(base, u);
 			if (StringUtils.isBlank(linkUrl)) {
@@ -228,12 +230,13 @@ public class ExtractUtils {
 		List<PageLink> httpAbs=new LinkedList();
 		for(PageLink p:result) {
 			if(p.getLinkUrl()!=null&&p.getLinkUrl().startsWith("http://")
-					&&p.getAutoAdapt()==0) {
+					&&(p.getAutoAdapt()==null||p.getAutoAdapt()==0)) {
 				httpAbs.add(p);
 			}
 		}
 		result.addAll(htmlList);
 		PageLink p=new PageLink();
+		p.setAutoAdapt(0);
 		p.setLinkUrl(url);
 		p.setPageType(PageTypeEnum.HTML.getPageType());
 		if(!httpAbs.isEmpty()) {
