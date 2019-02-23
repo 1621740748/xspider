@@ -78,7 +78,7 @@ public class ExtractUtils {
 			if (url.startsWith("http://")) {
 				httpEnable = OkhttpUtils.getInstance().checkUrlOk(url);
 				httpsEnable = OkhttpUtils.getInstance().checkUrlOk(url.replace("http://", "https://"));
-			} else if (url.startsWith("http://")) {
+			} else if (url.startsWith("https://")) {
 				httpsEnable = OkhttpUtils.getInstance().checkUrlOk(url);
 				httpEnable = OkhttpUtils.getInstance().checkUrlOk(url.replace("https://", "http://"));
 			}
