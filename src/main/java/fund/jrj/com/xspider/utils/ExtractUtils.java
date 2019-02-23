@@ -90,9 +90,21 @@ public class ExtractUtils {
 		for (WebElement we : webElements) {
 			PageLink p = new PageLink();
 			p.setPageType(pageType);
-			String u = we.getAttribute("href");
+			String u = null;
+			if(pageType==PageTypeEnum.CSS.getPageType()
+					||pageType==PageTypeEnum.HTML.getPageType()) {
+				u=we.getAttribute("href");
+			}else if(pageType==PageTypeEnum.JS.getPageType()
+					||pageType==PageTypeEnum.IMG.getPageType()) 
+			{
+				u=we.getAttribute("src");
+			}
 			if (u != null && u.startsWith("//")) {
 				p.setAutoAdapt(1);
+			}
+			//有图片地址写死http的情况
+			if(u!=null&&u.startsWith("http://")) {
+				p.setHttpExist(1);
 			}
 			String linkUrl = getAbsUrl(base, u);
 			if (StringUtils.isBlank(linkUrl)) {
