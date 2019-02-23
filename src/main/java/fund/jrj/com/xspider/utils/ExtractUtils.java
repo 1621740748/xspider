@@ -80,6 +80,7 @@ public class ExtractUtils {
 			public void onResponse(Call call, Response response) throws IOException {
 				pl.setHttpsEnable(1);
 				hostHttpsMap.put(host, true);
+				response.close();
 			}
 		});
 	}
@@ -170,6 +171,7 @@ public class ExtractUtils {
 					if(pl.getPageType()==PageTypeEnum.CSS.getPageType()
 							||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
 						String body=response.body().string();
+						response.close();
 						String https=findHttpAbs(body);
 						if(StringUtils.isNotBlank(https)) {
 							pl.setHttpExist(1);
@@ -202,6 +204,7 @@ public class ExtractUtils {
 					if(pl.getPageType()==PageTypeEnum.CSS.getPageType()
 							||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
 						String body=response.body().string();
+						response.close();
 						String https=findHttpAbs(body);
 						if(StringUtils.isNotBlank(https)) {
 							pl.setHttpExist(1);
