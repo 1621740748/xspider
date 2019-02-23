@@ -24,6 +24,7 @@ import okhttp3.Response;
 
 public class ExtractUtils {
 	public static Map<String, Boolean> hostHttpsMap = new HashMap<>();
+	public static final Integer MAX_INFOSIZE=512;
 	public static Pattern HTTPURL = Pattern.compile("(http://(?:[a-z,A-Z,0-9]+\\.){1,6}[^\"\'\\s]+)"); // 正则表达式
 	private static String getBaseURL(String url) {
 		try {
@@ -60,7 +61,7 @@ public class ExtractUtils {
 		return base + "/" + uri;
 	}
 
-	private static void checkHttpsHost(String url, String host, PageLink pl) {
+	public static void checkHttpsHost(String url, String host, PageLink pl) {
 		if (hostHttpsMap.containsKey(host)) {
 			if (hostHttpsMap.get(host)) {
 				pl.setHttpsEnable(1);
@@ -85,14 +86,14 @@ public class ExtractUtils {
 		});
 	}
 
-	private static void addUrl(List<PageLink> result, List<WebElement> webElements, Integer pageType, String base,
+	private static List<PageLink> getAddUrl(List<WebElement> webElements, Integer pageType, String base,
 			String parentUrl) {
+		List<PageLink> addList=new LinkedList<>();
 		for (WebElement we : webElements) {
 			PageLink p = new PageLink();
 			p.setPageType(pageType);
 			String u = null;
-			if(pageType==PageTypeEnum.CSS.getPageType()
-					||pageType==PageTypeEnum.HTML.getPageType()) {
+			if(pageType==PageTypeEnum.CSS.getPageType()) {
 				u=we.getAttribute("href");
 			}else if(pageType==PageTypeEnum.JS.getPageType()
 					||pageType==PageTypeEnum.IMG.getPageType()) 
@@ -109,23 +110,12 @@ public class ExtractUtils {
 			p.setLinkUrl(linkUrl);
 			p.setLinkParentUrl(parentUrl);
 			System.out.println(linkUrl);
-			// 检查host是否jrj域名
-			String host = getHost(p.getLinkUrl());
-//			boolean flag = isJRJHost(host);
-			// 不检查http页面是否
-			if (p.getPageType() == PageTypeEnum.CSS.getPageType()
-					||p.getPageType()==PageTypeEnum.JS.getPageType()) {
-				//检查资源是否包含http写死的情况
-				checkJscssExistHttp(p);
-			}
-			// 检查是否支持https
-			String url = p.getLinkUrl().replace("http://", "https://");
-			checkHttpsHost(url, host, p);
-			result.add(p);
+			addList.add(p);
 		}
+		return addList;
 	}
 
-	private static String getHost(String url) {
+	public static String getHost(String url) {
 		try {
 			return new URL(url).getHost();
 		} catch (MalformedURLException e) {
@@ -151,10 +141,7 @@ public class ExtractUtils {
 			return "";
 		}else {
 			String s= StringUtils.join(result, "\n");
-			if(s.length()>512) {
-				s=s.substring(0, 511);
-			}
-			return s;
+			return StringUtils.abbreviate(s, MAX_INFOSIZE);
 		}
 	}
 
@@ -162,7 +149,7 @@ public class ExtractUtils {
 	 * 检查资源链接内容是否包含http
 	 * @param pl
 	 */
-	private static void checkJscssExistHttp(final PageLink pl) {
+	public static void checkJscssExistHttp(final PageLink pl) {
 		//检查是否已经分析过该资源
 		String value=RockUtils.get(pl.getLinkUrl());
 		if(StringUtils.isNotBlank(value)) {
@@ -203,7 +190,15 @@ public class ExtractUtils {
 			});
 
 	}
-
+	private static String joinHttpUrls(List<PageLink> pls) {
+		StringBuilder r=new StringBuilder();
+		for(PageLink p:pls) {
+			r.append(p.getLinkUrl());
+			r.append("\n");
+		}
+		String result= r.toString();
+		return StringUtils.strip(result, "\n");
+	}
 	public static List<PageLink> extractLinks(String url) {
 		String base = getBaseURL(url);
 		List<PageLink> result = new LinkedList<>();
@@ -212,16 +207,40 @@ public class ExtractUtils {
 		driver.get(url);
 		List<WebElement> webElements = driver.findElementsByTagName("link");
 		System.out.println("--------------link------------------------");
-		addUrl(result, webElements, PageTypeEnum.CSS.getPageType(), base, url);
+		List<PageLink >cssList=getAddUrl(webElements, PageTypeEnum.CSS.getPageType(), base, url);
 		webElements = driver.findElementsByTagName("script");
 		System.out.println("--------------script------------------------");
-		addUrl(result, webElements, PageTypeEnum.JS.getPageType(), base, url);
+		List<PageLink >jsList=getAddUrl(webElements, PageTypeEnum.JS.getPageType(), base, url);
 		webElements = driver.findElementsByTagName("img");
 		System.out.println("--------------img------------------------");
-		addUrl(result, webElements, PageTypeEnum.IMG.getPageType(), base, url);
+		List<PageLink >imgList=getAddUrl(webElements, PageTypeEnum.IMG.getPageType(), base, url);
 		webElements = driver.findElementsByTagName("a");
 		System.out.println("--------------a------------------------");
-		addUrl(result, webElements, PageTypeEnum.HTML.getPageType(), base, url);
+		List<PageLink >htmlList=getAddUrl( webElements, PageTypeEnum.HTML.getPageType(), base, url);
+		result.addAll(cssList);
+		result.addAll(jsList);
+		result.addAll(imgList);
+		//检查页面是否是有写死的http资源
+		List<PageLink> httpAbs=new LinkedList();
+		for(PageLink p:result) {
+			if(p.getLinkUrl()!=null&&p.getLinkUrl().startsWith("http://")
+					&&p.getAutoAdapt()==0) {
+				httpAbs.add(p);
+			}
+		}
+		result.addAll(htmlList);
+		PageLink p=new PageLink();
+		p.setLinkUrl(url);
+		p.setPageType(PageTypeEnum.HTML.getPageType());
+		if(!httpAbs.isEmpty()) {
+			p.setHttpExist(1);
+			String s=joinHttpUrls(httpAbs);
+			p.setHttpExistContent(StringUtils.abbreviate(s, MAX_INFOSIZE));
+			
+		}else {
+			p.setHttpExist(0);
+		}
+		result.add(p);
 		return result;
 	}
 }
