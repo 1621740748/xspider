@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
+import com.alibaba.fastjson.JSON;
+
 import fund.jrj.com.xspider.bo.PageLink;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
 import okhttp3.Call;
@@ -143,6 +145,16 @@ public class ExtractUtils {
 		if (pl.getPageType() == PageTypeEnum.HTML.getPageType() && !flag) {
 			return;
 		}
+		//检查是否已经分析过该资源
+		String value=RockUtils.get(pl.getLinkUrl());
+		if(StringUtils.isNotBlank(value)) {
+			PageLink temp=JSON.parseObject(value,PageLink.class );
+			pl.setHttpEnable(temp.getHttpEnable());
+			pl.setHttpsEnable(temp.getHttpsEnable());
+			pl.setHttpExist(temp.getHttpExist());
+			pl.setHttpExistContent(temp.getHttpExistContent());
+			return;
+		}
 		if (pl.getLinkUrl().startsWith("http://")) {
 			// 检查http支持情况以及是否包含http写死的情况
 			OkhttpUtils.getInstance().doGet(pl.getLinkUrl(), new Callback() {
@@ -167,8 +179,9 @@ public class ExtractUtils {
 							
 						}
 					}
+					RockUtils.put(pl.getLinkUrl(), JSON.toJSONString(pl));
 				}
-
+				
 			});
 			// 检查时候支持https
 			String url = pl.getLinkUrl().replace("http://", "https://");
@@ -198,6 +211,7 @@ public class ExtractUtils {
 							
 						}
 					}
+					RockUtils.put(pl.getLinkUrl(), JSON.toJSONString(pl));
 				}
 
 			});
