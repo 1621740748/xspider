@@ -93,7 +93,8 @@ public class ExtractUtils {
 			PageLink p = new PageLink();
 			p.setPageType(pageType);
 			String u = null;
-			if(pageType==PageTypeEnum.CSS.getPageType()) {
+			if(pageType==PageTypeEnum.CSS.getPageType()
+					||pageType==PageTypeEnum.HTML.getPageType()) {
 				u=we.getAttribute("href");
 			}else if(pageType==PageTypeEnum.JS.getPageType()
 					||pageType==PageTypeEnum.IMG.getPageType()) 
