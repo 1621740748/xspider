@@ -7,5 +7,6 @@ create table page_link(
 		https_enable tinyint default 0 comment '1 可以https访问 0 不可以',
 		http_enable tinyint  default 1 comment '1 可以http访问 0 不可以',
 		http_exist tinyint default 0 comment '是否存在http内容',
-		http_exist_content varchar(512) default '' comment 'http内容'
+		http_exist_content varchar(2048) default '' comment 'http内容',
+		create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'
 );

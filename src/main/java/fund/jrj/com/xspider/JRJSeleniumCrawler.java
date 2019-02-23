@@ -24,7 +24,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.rocksdb.RocksDB;
 
 import cn.edu.hfut.dmic.webcollector.crawldb.DBManager;
 import cn.edu.hfut.dmic.webcollector.crawler.Crawler;
@@ -32,7 +31,6 @@ import cn.edu.hfut.dmic.webcollector.fetcher.Executor;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
-import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBUtils;
 import fund.jrj.com.xspider.bo.PageLink;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
 import fund.jrj.com.xspider.dao.PageLinkDao;

@@ -24,7 +24,7 @@ import okhttp3.Response;
 
 public class ExtractUtils {
 	public static Map<String, Boolean> hostHttpsMap = new HashMap<>();
-	public static final Integer MAX_INFOSIZE=512;
+	public static final Integer MAX_INFOSIZE=2048;
 	public static Pattern HTTPURL = Pattern.compile("(http://(?:[a-z,A-Z,0-9]+\\.){1,6}[^\"\'\\s]+)"); // 正则表达式
 	private static String getBaseURL(String url) {
 		try {
