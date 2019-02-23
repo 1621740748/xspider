@@ -171,7 +171,6 @@ public class ExtractUtils {
 					if(pl.getPageType()==PageTypeEnum.CSS.getPageType()
 							||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
 						String body=response.body().string();
-						response.close();
 						String https=findHttpAbs(body);
 						if(StringUtils.isNotBlank(https)) {
 							pl.setHttpExist(1);
@@ -183,6 +182,7 @@ public class ExtractUtils {
 						}
 					}
 					RockUtils.put(pl.getLinkUrl(), JSON.toJSONString(pl));
+					response.close();
 				}
 				
 			});
@@ -204,7 +204,6 @@ public class ExtractUtils {
 					if(pl.getPageType()==PageTypeEnum.CSS.getPageType()
 							||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
 						String body=response.body().string();
-						response.close();
 						String https=findHttpAbs(body);
 						if(StringUtils.isNotBlank(https)) {
 							pl.setHttpExist(1);
@@ -216,6 +215,7 @@ public class ExtractUtils {
 						}
 					}
 					RockUtils.put(pl.getLinkUrl(), JSON.toJSONString(pl));
+					response.close();
 				}
 
 			});
