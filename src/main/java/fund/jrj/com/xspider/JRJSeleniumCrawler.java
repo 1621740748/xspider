@@ -70,9 +70,7 @@ public class JRJSeleniumCrawler {
                 			next.add(pl.getLinkUrl());
                 		}
                 	}
-        			// 检查host是否jrj域名
         			String host = ExtractUtils.getHost(pl.getLinkUrl());
-//        			boolean flag = isJRJHost(host);
         			//检查资源是否包含http写死的情况
         			if (pl.getPageType() == PageTypeEnum.CSS.getPageType()
         					||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
