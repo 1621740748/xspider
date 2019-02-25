@@ -18,3 +18,9 @@ create table http_resources(
 		https_enable tinyint default 0 comment '是否https可访问',
 		create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'
 );
+create table  jscss_contains(
+		url_id int auto_increment primary key comment '链接ID',
+		url varchar(256) comment '链接',
+		contain_host varchar(128) comment '包含的host',
+		create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'
+);
