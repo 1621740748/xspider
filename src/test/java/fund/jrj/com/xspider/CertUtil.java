@@ -22,9 +22,6 @@ public class CertUtil {
     public static void main(String[] args) {
     	getCertExpired("https://www.baidu.com/");
     	getCertExpired("https://www.jrj.com.cn/");
-    	
-    	//getCertExpired("https://192.168.**.**");
-    	
     }
 	
 	public static void getCertExpired(String httpsUrl) {
