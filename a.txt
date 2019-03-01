@@ -36,5 +36,6 @@ https://tongji.wrating.com
 https://usstock.jrj.com.cn       
 https://v.jrj.com.cn             
 https://win.jrj.com              
-https://win.jrj.com.cn           
-https://www.jrj.com.cn           
+https://win.jrj.com.cn    
+https://www.jrj.com.cn         
+         
