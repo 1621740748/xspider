@@ -12,7 +12,7 @@ public class PageUtils {
 		BufferedReader buff = null;
 		Process p = null;
 		try {
-			//打印所有进程的信息
+			//打印所有url自动加载的资源
 			String path="python "+PageUtils.class.getResource("").getPath()+"br.py "+pUrl;
 			p = Runtime.getRuntime().exec(path);
 			p.waitFor();
