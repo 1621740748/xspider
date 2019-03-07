@@ -14,13 +14,14 @@ public class PageUtils {
 		try {
 			//打印所有进程的信息
 			String path="python "+PageUtils.class.getResource("").getPath()+"br.py "+pUrl;
-			System.out.println(path);
 			p = Runtime.getRuntime().exec(path);
 			p.waitFor();
 			//用流读出来
 			buff = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			String temp = null;
 			//遍历
+			//跳过第一行
+			buff.readLine();
 			while ((temp=buff.readLine())!=null) {
 				resultList.add(temp);
 			}
