@@ -34,5 +34,22 @@ public class TestGetResourceUrls2 {
 				System.out.println("content the same:"+(p.equals(p1)?"yes":"no"));
 			}
 		}
+		
+		List<String> httpsLinks=PageUtils.getResourceUrls("https://fund.jrj.com.cn");
+		System.out.println("-----------------------------------------------");
+		System.out.println("find problem resources in page:");
+		for(String url:httpsLinks) {
+			if(url!=null&&url.startsWith("http://")) {
+				System.out.println(url);
+			}
+		}
+		System.out.println("-----------------------------------------------");
+		System.out.println("find problem resources in html:");
+		PageResult page=OkhttpUtils.getInstance().getUrl(pUrl);
+		for(String url:httpsLinks) {
+			if(page.getContent()!=null&&page.getContent().indexOf(url)!=-1) {
+				System.out.println(url);
+			}
+		}
 	}
 }
