@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fund.jrj.com.xspider.bo.PageResult;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -21,7 +22,12 @@ public class OkhttpUtils {
 	// 构造方法要私有化
 	private OkhttpUtils() {
 		// 创建OkhttpClient
-		okHttpClient = new OkHttpClient.Builder().connectTimeout(2, TimeUnit.SECONDS).readTimeout(2, TimeUnit.SECONDS)
+		okHttpClient = new OkHttpClient
+				.Builder()
+				.connectTimeout(2, TimeUnit.SECONDS)
+				.readTimeout(2, TimeUnit.SECONDS)
+                .sslSocketFactory(SSLSocketClient.getSSLSocketFactory())//配置
+                .hostnameVerifier(SSLSocketClient.getHostnameVerifier())//配置
 				.build();
 	}
 
@@ -97,6 +103,34 @@ public class OkhttpUtils {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	public  PageResult getUrl(String url) {
+        Request request = new Request.Builder().url(url)
+                .get().build();
+        Call call = okHttpClient.newCall(request);
+        PageResult result=new PageResult();
+        try {
+            Response response = call.execute();
+            result.setOk(0);
+            if(response.isSuccessful()) {
+            	result.setOk(1);
+            	String type=response.body().contentType().type();
+            	if(type!=null&&type.equals("text")) {
+            		result.setType(1);
+            		result.setContent(response.body().string());
+            		result.setImage(null);
+            	}else if(type!=null&&type.equals("image")) {
+            		result.setType(2);
+            		result.setContent(null);
+            		result.setImage(response.body().bytes());
+            	}
+            }
+            response.close();
+           
+        } catch (Exception e) {
+           // e.printStackTrace();
+        }
+		return result;
 	}
 
 }

@@ -35,6 +35,8 @@ public class TestGetResourceUrls {
 		System.out.println(StringUtils.join(rs5,"\n"));
 		System.out.println("rs5:"+rs5.size());
 		System.out.println("---------------------------");
+		
+		
 	}
 
 }

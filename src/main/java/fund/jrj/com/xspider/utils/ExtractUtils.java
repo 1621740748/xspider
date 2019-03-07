@@ -137,7 +137,15 @@ public class ExtractUtils {
 		}
 		return "";
 	}
-
+	public static String getHostAndPath(String url) {
+		try {
+			URL u=new URL(url);
+			return u.getHost()+u.getPath();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 	private static boolean isJRJHost(String host) {
 		if (host.endsWith(".jrj.com.cn") || host.endsWith(".jrjimg.cn")) {
 			return true;
