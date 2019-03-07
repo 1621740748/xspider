@@ -109,6 +109,7 @@ public class OkhttpUtils {
                 .get().build();
         Call call = okHttpClient.newCall(request);
         PageResult result=new PageResult();
+        result.setUrl(url);
         try {
             Response response = call.execute();
             result.setOk(0);

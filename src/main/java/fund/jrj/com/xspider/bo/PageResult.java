@@ -7,6 +7,7 @@ public class PageResult {
 	private int type;
 	private String content;
 	private byte[] image;
+	private String url;
 	public int getType() {
 		return type;
 	}
@@ -64,6 +65,12 @@ public class PageResult {
 		if (type != other.type)
 			return false;
 		return true;
+	}
+	public String getUrl() {
+		return url;
+	}
+	public void setUrl(String url) {
+		this.url = url;
 	}
 	
 	
