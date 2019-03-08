@@ -38,3 +38,22 @@ create table  host_certificate(
   private_key varchar(4096) comment '私钥',
   create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'
 );
+create table resources(
+  r_id int auto_increment primary key comment '资源ID' ,
+  url varchar(256) comment '链接',
+  host varchar(128) comment '链接host',
+  host_path varchar(256) comment 'host和路径',
+  http_enable tinyint comment 'http是否支持',
+  https_enable tinyint comment 'https是否支持',
+  hash varchar(128) comment '链接hash',
+  problem_type tinyint comment '问题类型 0、没有问题 1、有问题 2、不确定有无问题',
+  load_type tinyint comment '1、html页面加载 	2、js或者css加载',
+  create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'
+);
+create table page_resources(
+     pr_id int auto_increment primary key comment 'ID' ,
+     page_url varchar(256) comment '页面url',
+     res_hash varchar(256) comment '资源url hash',  
+     page_type tinyint comment '1、html页面 	2、js或者css',
+     create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'     
+);

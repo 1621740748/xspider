@@ -1,12 +1,16 @@
 package fund.jrj.com.xspider.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fund.jrj.com.xspider.bo.PageResult;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -17,11 +21,16 @@ public class OkhttpUtils {
 	private static OkhttpUtils okhttpUtils;
 	private final OkHttpClient okHttpClient;
 	private static Logger log = LoggerFactory.getLogger(OkhttpUtils.class);
-
+	private static  String cacheFileDir="cache/file/";
 	// 构造方法要私有化
 	private OkhttpUtils() {
 		// 创建OkhttpClient
-		okHttpClient = new OkHttpClient.Builder().connectTimeout(2, TimeUnit.SECONDS).readTimeout(2, TimeUnit.SECONDS)
+		okHttpClient = new OkHttpClient
+				.Builder()
+				.connectTimeout(2, TimeUnit.SECONDS)
+				.readTimeout(2, TimeUnit.SECONDS)
+                .sslSocketFactory(SSLSocketClient.getSSLSocketFactory())//配置
+                .hostnameVerifier(SSLSocketClient.getHostnameVerifier())//配置
 				.build();
 	}
 
@@ -33,6 +42,7 @@ public class OkhttpUtils {
 		return okhttpUtils;
 	}
 
+	
 	/**
 	 * GET请求
 	 *
@@ -97,6 +107,72 @@ public class OkhttpUtils {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	private  PageResult getUrlFromCache(String url) {
+		String hash=DigestUtils.sha384Hex(url);
+		File file=new File(cacheFileDir+hash);
+		if(file.exists()) {
+			try {
+				String content=FileUtils.readFileToString(file, "utf-8");
+				PageResult r=new PageResult();
+				r.setContent(content);
+				r.setOk(1);
+				r.setType(1);
+				r.setImage(null);
+				return r;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	private void storeUrlToCache(PageResult result) {
+		if(result!=null&&result.getOk()==1&&result.getType()==1) {
+			String hash=DigestUtils.sha384Hex(result.getUrl());
+			File file=new File(cacheFileDir+hash);
+			if(!file.exists()) {
+				try {
+					FileUtils.writeByteArrayToFile(file, result.getContent().getBytes("utf-8"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+	public  PageResult getUrl(String url) {
+		PageResult result=this.getUrlFromCache(url);
+		if(result!=null) {
+			return result;
+		}
+        Request request = new Request.Builder().url(url)
+                .get().build();
+        Call call = okHttpClient.newCall(request);
+        result=new PageResult();
+        result.setUrl(url);
+        try {
+            Response response = call.execute();
+            result.setOk(0);
+            if(response.isSuccessful()) {
+            	result.setOk(1);
+            	String type=response.body().contentType().type();
+            	if(type!=null&&type.equals("text")) {
+            		result.setType(1);
+            		result.setContent(response.body().string());
+            		result.setImage(null);
+            	}else if(type!=null&&type.equals("image")) {
+            		result.setType(2);
+            		result.setContent(null);
+            		result.setImage(response.body().bytes());
+            	}
+            }
+            response.close();
+           
+        } catch (Exception e) {
+           // e.printStackTrace();
+        }
+        this.storeUrlToCache(result);
+		return result;
 	}
 
 }

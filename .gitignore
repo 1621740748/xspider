@@ -1,7 +1,8 @@
 target/
 crawl/
-jscss/
 cache/
+jscss/
+__pycache__/
 .classpath
 .project
 .settings/
