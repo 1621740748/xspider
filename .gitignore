@@ -2,6 +2,7 @@ target/
 crawl/
 cache/
 jscss/
+__pycache__/
 .classpath
 .project
 .settings/
