@@ -16,6 +16,8 @@ public class Resources {
 	private Integer problemType;
 	//1、html 页面加载 2、js或者css加载
 	private Integer loadType;
+	//http和https 返回的内容是否一致 0、不一样 1、一样
+	private Integer theSame;
 	public Integer getrId() {
 		return rId;
 	}
@@ -69,6 +71,12 @@ public class Resources {
 	}
 	public void setLoadType(Integer loadType) {
 		this.loadType = loadType;
+	}
+	public Integer getTheSame() {
+		return theSame;
+	}
+	public void setTheSame(Integer theSame) {
+		this.theSame = theSame;
 	}
 	
 }

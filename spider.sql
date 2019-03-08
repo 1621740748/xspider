@@ -48,6 +48,7 @@ create table resources(
   hash varchar(128) comment '链接hash',
   problem_type tinyint comment '问题类型 0、没有问题 1、有问题 2、不确定有无问题',
   load_type tinyint comment '1、html页面加载 	2、js或者css加载',
+  the_same tinyint comment '0、不一样 1、一样',  
   create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'
 );
 create table page_resources(
