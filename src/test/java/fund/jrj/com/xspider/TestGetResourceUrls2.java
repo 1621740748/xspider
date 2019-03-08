@@ -2,63 +2,64 @@ package fund.jrj.com.xspider;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.util.concurrent.RateLimiter;
+
 import fund.jrj.com.xspider.bo.PageResult;
-import fund.jrj.com.xspider.service.GetPageCallable;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 import fund.jrj.com.xspider.utils.OkhttpUtils;
 import fund.jrj.com.xspider.utils.PageUtils;
 public class TestGetResourceUrls2 {
 	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(8);
-	   // 构建完成服务
-    private static CompletionService<PageResult> completionService = new ExecutorCompletionService<PageResult>(
-    		fixedThreadPool);
+	private static     RateLimiter limiter = RateLimiter.create(200);
 
 	public static void main(String[] args) {
 		Long startTime=System.currentTimeMillis();
 		String pUrl="http://fund.jrj.com.cn";
 		List<String> rs=PageUtils.getResourceUrls(pUrl);
-		List<Future<PageResult>> futureList=new LinkedList<>();
-		for(String url:rs) {
-			Future<PageResult>future=completionService.submit(new GetPageCallable(url));
-			futureList.add(future);
-		}
-		System.out.println(StringUtils.join(rs,"\n"));
-		System.out.println("rs:"+rs.size());
+		List<CompletableFuture<Void>> futureList=new LinkedList<>();
 		List<PageResult>jscssFiles=new LinkedList<>();
 		for(String url:rs) {
-			System.out.println("url:"+url);
-			System.out.println("host:"+ExtractUtils.getHost(url));
-			System.out.println("path:"+ExtractUtils.getHostAndPath(url));
-			if(url.startsWith("http://")) {
+			CompletableFuture<Void> future=CompletableFuture.supplyAsync(()->{
+				limiter.acquire();
 				PageResult p=OkhttpUtils.getInstance().getUrl(url);
-				if(p.getOk()==1&&p.getType()==1) {
-					jscssFiles.add(p);
+				return p;
+			},fixedThreadPool).thenAcceptAsync(pr->{
+				System.out.println("url:"+url);
+				System.out.println("host:"+ExtractUtils.getHost(url));
+				System.out.println("path:"+ExtractUtils.getHostAndPath(url));
+				if(url.startsWith("http://")) {
+					PageResult p=pr;
+					if(p.getOk()==1&&p.getType()==1) {
+						jscssFiles.add(p);
+					}
+					System.out.println("http support:"+(p.getOk()==1?"yes":"no"));
+					PageResult p1=OkhttpUtils.getInstance().getUrl(url.replace("http://", "https://"));
+					System.out.println("https support:"+(p1.getOk()==1?"yes":"no"));
+					System.out.println("content the same:"+(p.equals(p1)?"yes":"no"));
+				}else if (url.startsWith("https://")) {
+					PageResult p=pr;
+					if(p.getOk()==1 &&p.getType()==1) {
+						jscssFiles.add(p);
+					}
+					System.out.println("https support:"+(p.getOk()==1?"yes":"no"));
+					PageResult p1=OkhttpUtils.getInstance().getUrl(url.replace("https://", "http://"));
+					System.out.println("http support:"+(p1.getOk()==1?"yes":"no"));
+					System.out.println("content the same:"+(p.equals(p1)?"yes":"no"));
 				}
-				System.out.println("http support:"+(p.getOk()==1?"yes":"no"));
-				PageResult p1=OkhttpUtils.getInstance().getUrl(url.replace("http://", "https://"));
-				System.out.println("https support:"+(p1.getOk()==1?"yes":"no"));
-				System.out.println("content the same:"+(p.equals(p1)?"yes":"no"));
-			}else if (url.startsWith("https://")) {
-				PageResult p=OkhttpUtils.getInstance().getUrl(url);
-				if(p.getOk()==1 &&p.getType()==1) {
-					jscssFiles.add(p);
-				}
-				System.out.println("https support:"+(p.getOk()==1?"yes":"no"));
-				PageResult p1=OkhttpUtils.getInstance().getUrl(url.replace("https://", "http://"));
-				System.out.println("http support:"+(p1.getOk()==1?"yes":"no"));
-				System.out.println("content the same:"+(p.equals(p1)?"yes":"no"));
-			}
+			},fixedThreadPool);
+			futureList.add(future);
 		}
+		CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
 		
+		System.out.println(StringUtils.join(rs,"\n"));
+		System.out.println("rs:"+rs.size());		
 		List<String> linksForHttps=PageUtils.getResourceUrls("https://fund.jrj.com.cn");
 		System.out.println("-----------------------------------------------");
 		System.out.println("find problem resources in page:");
@@ -113,5 +114,6 @@ public class TestGetResourceUrls2 {
 		
 		Long endTime=System.currentTimeMillis();
 		System.out.println("take time:"+(endTime-startTime)/1000+" seconds");
+		fixedThreadPool.shutdown();
 	}
 }
