@@ -1,6 +1,7 @@
 target/
 crawl/
 jscss/
+cache/
 .classpath
 .project
 .settings/
