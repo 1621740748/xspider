@@ -31,10 +31,6 @@ import cn.edu.hfut.dmic.webcollector.fetcher.Executor;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
-import fund.jrj.com.xspider.bo.PageLink;
-import fund.jrj.com.xspider.constants.PageTypeEnum;
-import fund.jrj.com.xspider.dao.PageLinkDao;
-import fund.jrj.com.xspider.utils.DBUtils;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 
 
@@ -43,7 +39,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  *
  * @author hu
  */
-public class JRJSeleniumCrawler {
+public class JRJWebkitCrawler {
   static {
   //禁用Selenium的日志
   Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
@@ -58,26 +54,8 @@ public class JRJSeleniumCrawler {
             	if(datum==null||datum.url()==null) {
             		return;
             	}
-                List<PageLink> links=ExtractUtils.extractLinks(datum.url());
-                for(PageLink pl:links) {
-                	if(pl.getPageType()==PageTypeEnum.HTML.getPageType()) {
-                		if(pl.getLinkUrl().startsWith("http://fund.jrj.com.cn")
-                			&&StringUtils.isNotBlank(pl.getLinkParentUrl())
-                			&&!pl.getLinkUrl().toLowerCase().endsWith(".pdf")
-                			&&!pl.getLinkUrl().toLowerCase().endsWith(".mp4")) {
-                			next.add(pl.getLinkUrl());
-                		}
-                	}
-        			String host = ExtractUtils.getHost(pl.getLinkUrl());
-        			//检查资源是否包含http写死的情况
-        			if (pl.getPageType() == PageTypeEnum.CSS.getPageType()
-        					||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
-        	
-        				ExtractUtils.checkJscssExistHttp(pl);
-        			}
-                }
-            	PageLinkDao plDao=DBUtils.getInstance().create(PageLinkDao.class);
-            	plDao.add(links);
+            	List<String>urls=ExtractUtils.extractLinksV2(datum.url());
+            	next.add(urls);
             }
         };
         //创建一个基于伯克利DB的DBManager
@@ -85,7 +63,7 @@ public class JRJSeleniumCrawler {
         
         //创建一个Crawler需要有DBManager和Executor
         List<String> seeds= FileUtils.readLines(
-        		new File(JRJSeleniumCrawler.class.getResource("").getPath()+"fund_seed2.txt")
+        		new File(JRJWebkitCrawler.class.getResource("").getPath()+"fund_seed3.txt")
         		,"utf-8");
         Crawler crawler = new Crawler(manager, executor);
         for(String seed:seeds) {

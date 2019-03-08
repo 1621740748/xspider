@@ -1,9 +1,12 @@
 package fund.jrj.com.xspider.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +21,7 @@ public class OkhttpUtils {
 	private static OkhttpUtils okhttpUtils;
 	private final OkHttpClient okHttpClient;
 	private static Logger log = LoggerFactory.getLogger(OkhttpUtils.class);
-
+	private static  String cacheFileDir="cache/file/";
 	// 构造方法要私有化
 	private OkhttpUtils() {
 		// 创建OkhttpClient
@@ -39,6 +42,7 @@ public class OkhttpUtils {
 		return okhttpUtils;
 	}
 
+	
 	/**
 	 * GET请求
 	 *
@@ -104,11 +108,47 @@ public class OkhttpUtils {
 		}
 		return false;
 	}
+	private  PageResult getUrlFromCache(String url) {
+		String hash=DigestUtils.sha384Hex(url);
+		File file=new File(cacheFileDir+hash);
+		if(file.exists()) {
+			try {
+				String content=FileUtils.readFileToString(file, "utf-8");
+				PageResult r=new PageResult();
+				r.setContent(content);
+				r.setOk(1);
+				r.setType(1);
+				r.setImage(null);
+				return r;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	private void storeUrlToCache(PageResult result) {
+		if(result!=null&&result.getOk()==1&&result.getType()==1) {
+			String hash=DigestUtils.sha384Hex(result.getUrl());
+			File file=new File(cacheFileDir+hash);
+			if(!file.exists()) {
+				try {
+					FileUtils.writeByteArrayToFile(file, result.getContent().getBytes("utf-8"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
 	public  PageResult getUrl(String url) {
+		PageResult result=this.getUrlFromCache(url);
+		if(result!=null) {
+			return result;
+		}
         Request request = new Request.Builder().url(url)
                 .get().build();
         Call call = okHttpClient.newCall(request);
-        PageResult result=new PageResult();
+        result=new PageResult();
         result.setUrl(url);
         try {
             Response response = call.execute();
@@ -131,6 +171,7 @@ public class OkhttpUtils {
         } catch (Exception e) {
            // e.printStackTrace();
         }
+        this.storeUrlToCache(result);
 		return result;
 	}
 
