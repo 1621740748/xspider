@@ -5,17 +5,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.util.concurrent.RateLimiter;
 
 import fund.jrj.com.xspider.bo.PageResources;
 import fund.jrj.com.xspider.bo.PageResult;
 import fund.jrj.com.xspider.bo.Resources;
+import fund.jrj.com.xspider.dao.PageResourcesDao;
+import fund.jrj.com.xspider.dao.ResourcesDao;
+import fund.jrj.com.xspider.utils.DBUtils;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 import fund.jrj.com.xspider.utils.OkhttpUtils;
 import fund.jrj.com.xspider.utils.PageUtils;
@@ -50,25 +53,25 @@ public class ProblemResourceService {
 				return p;
 			},fixedThreadPool).thenAcceptAsync(pr->{
 				Resources res=new Resources();
-				res.setUrl(url);
-				res.setHost(ExtractUtils.getHost(url));
-				res.setHostPath(ExtractUtils.getHostAndPath(url));
-				if(url.startsWith("http://")) {
+				res.setUrl(pr.getUrl());
+				res.setHost(ExtractUtils.getHost(pr.getUrl()));
+				res.setHostPath(ExtractUtils.getHostAndPath(pr.getUrl()));
+				if(pr.getUrl().startsWith("http://")) {
 					PageResult p=pr;
 					if(p.getOk()==1&&p.getType()==1) {
 						jscssFiles.add(p);
 					}
 					res.setHttpEnable(p.getOk());
-					PageResult p1=OkhttpUtils.getInstance().getUrl(url.replace("http://", "https://"));
+					PageResult p1=OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("http://", "https://"));
 					res.setHttpsEnable(p1.getOk());
 					res.setTheSame(p.equals(p1)?1:0);
-				}else if (url.startsWith("https://")) {
+				}else if (pr.getUrl().startsWith("https://")) {
 					PageResult p=pr;
 					if(p.getOk()==1 &&p.getType()==1) {
 						jscssFiles.add(p);
 					}
 					res.setHttpsEnable(p.getOk());
-					PageResult p1=OkhttpUtils.getInstance().getUrl(url.replace("https://", "http://"));
+					PageResult p1=OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("https://", "http://"));
 					res.setHttpEnable(p1.getOk());
 					res.setTheSame(p.equals(p1)?1:0);
 				}
@@ -77,33 +80,46 @@ public class ProblemResourceService {
 			futureList.add(future);
 		}
 		CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
+		CompletableFuture<PageResult> futureHttps=CompletableFuture.supplyAsync(()->{
+			PageResult page=OkhttpUtils.getInstance().getUrl(pUrl);
+			return page;
+		});
 		List<String> linksForHttps=PageUtils.getResourceUrls(pUrl.replace("http://", "https://"));
-		List<String> problemUrlInPage=new LinkedList<>();
-		for(String url:linksForHttps) {
-			if(url!=null&&url.startsWith("http://")) {
-				problemUrlInPage.add(url);
-			}
-		}
-		for(String url:rs) {
-			if(url!=null&&url.startsWith("http://")) {
-				if(CollectionUtils
-						.exists(linksForHttps,
-								u->u.equals(url)
-								||u.equals(url.replace("http://", "https://")))) {
-					problemUrlInPage.add(url);
+		//查找没有问题的http资源，在http请求中有，在https请求中也有，为了防止一些页面有时间戳造成不是同一个链接，仅使用host+path比较
+		resList.stream().forEach(r->{
+			boolean find=linksForHttps.stream().anyMatch(s->{
+				String httpsHostPath=ExtractUtils.getHostAndPath(s);
+				if(r.getHostPath()!=null&&httpsHostPath.equals(r.getHost())) {
+					return true;
 				}
+				return false;
+			});
+			if(find) {
+				r.setProblemType(0);
+			}else {
+				r.setProblemType(1);
 			}
+		});
+	
+		try {
+			//找出在html中自动加载的资源
+			 PageResult page = futureHttps.get();
+             resList.parallelStream().forEach(r->{
+            	 if(page.getOk()==1&&page.getType()==1&&page.getContent()!=null&&page.getContent().indexOf(r.getUrl())!=-1) {
+            		 r.setLoadType(1);
+            	 }else {
+            		 r.setLoadType(0);
+            	 }
+             });
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
 		}
-		PageResult page=OkhttpUtils.getInstance().getUrl(pUrl);
-		List<String> problemUrlInHtml=new LinkedList<>();
-		for(String url:problemUrlInPage) {
-			if(page.getContent()!=null&&page.getContent().indexOf(url)!=-1) {
-				problemUrlInHtml.add(url);
-			}
-		}
-		List<String> problemUrlInJsAndCss=(List<String>) CollectionUtils.subtract(problemUrlInPage, problemUrlInHtml);
-		
-		
+		ResourcesDao resDao=DBUtils.getInstance().create(ResourcesDao.class);
+		resDao.add(resList);
+		PageResourcesDao prDao=DBUtils.getInstance().create(PageResourcesDao.class);
+		prDao.add(prList);		
 	}
 	public static void main(String[] args) {
 		Long startTime=System.currentTimeMillis();

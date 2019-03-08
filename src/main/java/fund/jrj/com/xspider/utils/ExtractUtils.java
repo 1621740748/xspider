@@ -53,14 +53,21 @@ public class ExtractUtils {
 		return base + "/" + uri;
 	}
 	public static String getHost(String url) {
+		if(StringUtils.isBlank(url)) {
+			return "";
+		}
 		try {
 			return new URL(url).getHost();
 		} catch (MalformedURLException e) {
+			System.out.println("error："+url);
 			e.printStackTrace();
 		}
 		return "";
 	}
 	public static String getHostAndPath(String url) {
+		if(StringUtils.isBlank(url)) {
+			return "";
+		}
 		try {
 			URL u=new URL(url);
 			return u.getHost()+u.getPath();

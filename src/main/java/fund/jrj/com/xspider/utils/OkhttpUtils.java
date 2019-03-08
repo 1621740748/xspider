@@ -115,6 +115,7 @@ public class OkhttpUtils {
 			try {
 				String content=FileUtils.readFileToString(file, "utf-8");
 				PageResult r=new PageResult();
+				r.setUrl(url);
 				r.setContent(content);
 				r.setOk(1);
 				r.setType(1);

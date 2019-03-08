@@ -40,7 +40,7 @@ create table  host_certificate(
 );
 create table resources(
   r_id int auto_increment primary key comment '资源ID' ,
-  url varchar(256) comment '链接',
+  url varchar(1024) comment '链接',
   host varchar(128) comment '链接host',
   host_path varchar(256) comment 'host和路径',
   http_enable tinyint comment 'http是否支持',
@@ -53,7 +53,7 @@ create table resources(
 );
 create table page_resources(
      pr_id int auto_increment primary key comment 'ID' ,
-     page_url varchar(256) comment '页面url',
+     page_url varchar(1024) comment '页面url',
      res_hash varchar(256) comment '资源url hash',  
      page_type tinyint comment '1、html页面 	2、js或者css',
      create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'     
