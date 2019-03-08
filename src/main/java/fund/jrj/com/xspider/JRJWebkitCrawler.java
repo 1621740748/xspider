@@ -31,6 +31,7 @@ import cn.edu.hfut.dmic.webcollector.fetcher.Executor;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
+import fund.jrj.com.xspider.service.ProblemResourceService;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 
 
@@ -54,6 +55,8 @@ public class JRJWebkitCrawler {
             	if(datum==null||datum.url()==null) {
             		return;
             	}
+            	System.out.println(datum.url());
+            	ProblemResourceService.findProblemResource(datum.url());
             	List<String>urls=ExtractUtils.extractLinksV2(datum.url());
             	next.add(urls);
             }

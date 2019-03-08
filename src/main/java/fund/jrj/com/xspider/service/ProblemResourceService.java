@@ -26,7 +26,8 @@ public class ProblemResourceService {
 	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(8);
 	private static     RateLimiter limiter = RateLimiter.create(200);
     private static Map<String,Integer> ImageUrlMap=new HashMap<>();
-	public  void  findProblemResource(String pUrl) {
+    private static Map<String,Integer> urlMap=new HashMap<>();
+	public static  void  findProblemResource(String pUrl) {
 		List<String> rs=PageUtils.getResourceUrls(pUrl);
 		List<CompletableFuture<Void>> futureList=new LinkedList<>();
 		List<PageResult>jscssFiles=new LinkedList<>();
@@ -43,7 +44,9 @@ public class ProblemResourceService {
 			prbo.setPageUrl(pUrl);
 			prbo.setResHash(hash);
 			prList.add(prbo);
-	
+	        if(urlMap.get(hash)!=null) {
+	        	continue;
+	        }
 			CompletableFuture<Void> future=CompletableFuture.supplyAsync(()->{
 				limiter.acquire();
 				PageResult p=OkhttpUtils.getInstance().getUrl(url);
@@ -76,10 +79,13 @@ public class ProblemResourceService {
 					res.setTheSame(p.equals(p1)?1:0);
 				}
 				resList.add(res);
+				urlMap.put(hash, 1);
 			},fixedThreadPool);
 			futureList.add(future);
 		}
-		CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
+		if(!futureList.isEmpty()) {
+			CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
+		}
 		CompletableFuture<PageResult> futureHttps=CompletableFuture.supplyAsync(()->{
 			PageResult page=OkhttpUtils.getInstance().getUrl(pUrl);
 			return page;
@@ -89,7 +95,7 @@ public class ProblemResourceService {
 		resList.stream().forEach(r->{
 			boolean find=linksForHttps.stream().anyMatch(s->{
 				String httpsHostPath=ExtractUtils.getHostAndPath(s);
-				if(r.getHostPath()!=null&&httpsHostPath.equals(r.getHost())) {
+				if(r.getHostPath()!=null&&httpsHostPath.equals(r.getHostPath())) {
 					return true;
 				}
 				return false;
