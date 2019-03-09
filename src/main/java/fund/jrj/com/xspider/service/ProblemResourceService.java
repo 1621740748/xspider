@@ -75,16 +75,16 @@ public class ProblemResourceService {
 				},fixedThreadPool);
 				futureList.add(future);
 			}else {
-				Resources res=new Resources();
-				res.setUrl(url);
-				res.setHost(ExtractUtils.getHost(url));
-				res.setHostPath(ExtractUtils.getHostAndPath(url));
 				Integer status=urlMap.get(hash);
 				if(status!=null) {
-				res.setHttpEnable(status&0x100);
-				res.setHttpsEnable(status&0x010);
-				res.setTheSame(status&0x001);
-				resList.add(res);
+					Resources res=new Resources();
+					res.setUrl(url);
+					res.setHost(ExtractUtils.getHost(url));
+					res.setHostPath(ExtractUtils.getHostAndPath(url));
+					res.setHttpEnable(status&0x100);
+					res.setHttpsEnable(status&0x010);
+					res.setTheSame(status&0x001);
+					resList.add(res);
 				}
 			}
 		}

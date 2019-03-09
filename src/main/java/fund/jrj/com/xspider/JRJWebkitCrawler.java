@@ -47,6 +47,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
 public class JRJWebkitCrawler {
 	static   List<String> seeds=null;
 	static Map<String,Integer> urlProccessed=new HashMap<>();
+	static File  ALL_PAGE_LINKS_FILE=new File("cache/links");
 	static {
 		//禁用Selenium的日志
 		Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
@@ -85,6 +86,8 @@ public class JRJWebkitCrawler {
 							.collect(Collectors.toList());
 
 					next.add(filterUrls);
+					FileUtils.write(ALL_PAGE_LINKS_FILE, StringUtils.join(filterUrls,"\n"),"utf-8" ,true);
+					FileUtils.write(ALL_PAGE_LINKS_FILE, "\n","utf-8" ,true);
 				}
 			}
 		};
