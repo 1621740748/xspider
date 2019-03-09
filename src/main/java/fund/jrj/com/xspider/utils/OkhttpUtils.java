@@ -119,7 +119,11 @@ public class OkhttpUtils {
 				PageResult r=new PageResult();
 				r.setUrl(url);
 				r.setContent(content);
-				r.setOk(1);
+				if(content!=null&&content.equals("112233~~")) {
+					r.setOk(0);
+				}else {
+					r.setOk(1);
+				}
 				r.setType(1);
 				r.setImage(null);
 				return r;
@@ -136,6 +140,17 @@ public class OkhttpUtils {
 			if(!file.exists()) {
 				try {
 					FileUtils.writeByteArrayToFile(file, result.getContent().getBytes("utf-8"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}else if(result!=null&&result.getOk()==0) {
+			//缓存失败，防止多次重试
+			String hash=DigestUtils.sha384Hex(result.getUrl());
+			File file=new File(cacheFileDir+hash);
+			if(!file.exists()) {
+				try {
+					FileUtils.writeByteArrayToFile(file,"112233~~".getBytes("utf-8"));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
