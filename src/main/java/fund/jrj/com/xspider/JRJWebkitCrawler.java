@@ -19,9 +19,9 @@ package fund.jrj.com.xspider;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -46,7 +46,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  */
 public class JRJWebkitCrawler {
 	static   List<String> seeds=null;
-	static Map<String,Integer> urlProccessed=new HashMap<>();
+	static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
 	static File  ALL_PAGE_LINKS_FILE=new File("cache/links");
 	static {
 		//禁用Selenium的日志
