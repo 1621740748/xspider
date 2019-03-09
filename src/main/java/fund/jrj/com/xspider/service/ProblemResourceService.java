@@ -71,7 +71,7 @@ public class ProblemResourceService {
 						res.setTheSame(p.equals(p1)?1:0);
 					}
 					resList.add(res);
-					urlMap.put(hash, res.getHttpEnable()<<2|res.getHttpEnable()<<1|res.getTheSame()&0b111);
+					urlMap.put(hash, res.getHttpEnable()<<2|res.getHttpsEnable()<<1|res.getTheSame()&0b111);
 				},fixedThreadPool);
 				futureList.add(future);
 			}else {
