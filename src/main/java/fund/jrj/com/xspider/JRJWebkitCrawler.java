@@ -18,7 +18,9 @@
 package fund.jrj.com.xspider;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,42 +43,58 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  * @author hu
  */
 public class JRJWebkitCrawler {
-  static {
-  //禁用Selenium的日志
-  Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
-  logger.setLevel(Level.OFF);
-}
+	static   List<String> seeds=null;
+	static {
+		//禁用Selenium的日志
+		Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
+		logger.setLevel(Level.OFF);
+
+		try {
+			seeds= FileUtils.readLines(
+					new File(JRJWebkitCrawler.class.getResource("").getPath()+"fund_seed3.txt")
+					,"utf-8");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 
-    public static void main(String[] args) throws Exception {
-        Executor executor = new Executor() {
-            @Override
-            public void execute(CrawlDatum datum, CrawlDatums next) throws Exception {
-            	if(datum==null||datum.url()==null) {
-            		return;
-            	}
-            	System.out.println(datum.url());
-            	ProblemResourceService.findProblemResource(datum.url());
-            	List<String>urls=ExtractUtils.extractLinksV2(datum.url());
-            	next.add(urls);
-            }
-        };
-        //创建一个基于伯克利DB的DBManager
-        DBManager manager = new RocksDBManager("crawl");
-        
-        //创建一个Crawler需要有DBManager和Executor
-        List<String> seeds= FileUtils.readLines(
-        		new File(JRJWebkitCrawler.class.getResource("").getPath()+"fund_seed3.txt")
-        		,"utf-8");
-        Crawler crawler = new Crawler(manager, executor);
-        for(String seed:seeds) {
-        	if(StringUtils.isNotBlank(seed)) {
-        		crawler.addSeed(seed);
-        	}
-        }
-        crawler.setThreads(5);
-        crawler.getConf().setExecuteInterval(200);
-        crawler.start(3);
-    }
+	public static void main(String[] args) throws Exception {
+		Executor executor = new Executor() {
+			@Override
+			public void execute(CrawlDatum datum, CrawlDatums next) throws Exception {
+				if(datum==null||datum.url()==null) {
+					return;
+				}
+				System.out.println(datum.url());
+				ProblemResourceService.findProblemResource(datum.url());
+				List<String>urls=ExtractUtils.extractLinksV2(datum.url());
+				if(urls!=null) {
+					List<String> 	filterUrls=urls.stream().filter(u->{
+						return seeds.stream().anyMatch(s->{
+							return u.contains(s);
+						});
+					}).collect(Collectors.toList());
+
+					next.add(filterUrls);
+				}
+			}
+		};
+		//创建一个基于伯克利DB的DBManager
+		DBManager manager = new RocksDBManager("crawl");
+
+		//创建一个Crawler需要有DBManager和Executor
+
+		Crawler crawler = new Crawler(manager, executor);
+		for(String seed:seeds) {
+			if(StringUtils.isNotBlank(seed)) {
+				crawler.addSeed(seed.trim());
+			}
+		}
+		crawler.setThreads(5);
+		crawler.getConf().setExecuteInterval(200);
+		crawler.start(7);
+	}
 
 }

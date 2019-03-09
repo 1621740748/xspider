@@ -35,15 +35,15 @@ public class ProblemResourceService {
 		List<PageResources>prList=new LinkedList<>();
 		for(String url:rs) {
 			String hash=DigestUtils.sha384Hex(url);
-			//如果是图像并且已经访问过，则不必再访问
-			if(ImageUrlMap.get(hash)!=null) {
-				continue;
-			}
 			PageResources prbo=new PageResources();
 			prbo.setPageType(1);
 			prbo.setPageUrl(pUrl);
 			prbo.setResHash(hash);
 			prList.add(prbo);
+			//如果是图像并且已经访问过，则不必再访问
+			if(ImageUrlMap.get(hash)!=null) {
+				continue;
+			}
 	        if(urlMap.get(hash)!=null) {
 	        	continue;
 	        }
