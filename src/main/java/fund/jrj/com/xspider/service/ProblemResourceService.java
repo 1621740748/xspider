@@ -71,7 +71,7 @@ public class ProblemResourceService {
 						res.setTheSame(p.equals(p1)?1:0);
 					}
 					resList.add(res);
-					urlMap.put(hash, res.getHttpEnable()<<2&res.getHttpEnable()<<1&res.getTheSame()&0x111);
+					urlMap.put(hash, res.getHttpEnable()<<2|res.getHttpEnable()<<1|res.getTheSame()&0x111);
 				},fixedThreadPool);
 				futureList.add(future);
 			}else {
@@ -81,9 +81,9 @@ public class ProblemResourceService {
 					res.setUrl(url);
 					res.setHost(ExtractUtils.getHost(url));
 					res.setHostPath(ExtractUtils.getHostAndPath(url));
-					res.setHttpEnable(status&0x100);
-					res.setHttpsEnable(status&0x010);
-					res.setTheSame(status&0x001);
+					res.setHttpEnable((status&0b100)>>2);
+					res.setHttpsEnable((status&0b010)>>1);
+					res.setTheSame(status&0b001);
 					res.setHash(hash);
 					resList.add(res);
 				}
