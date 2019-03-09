@@ -1,10 +1,10 @@
 package fund.jrj.com.xspider.service;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,8 +26,13 @@ import fund.jrj.com.xspider.utils.PageUtils;
 public class ProblemResourceService {
 	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(20);
 	private static     RateLimiter limiter = RateLimiter.create(200);
-	private static Map<String,Integer> urlMap=new HashMap<>();
+	private static final  Map<String,Integer> urlMap=new ConcurrentHashMap<>();
+	private static final  Map<String,Integer> pageMap=new ConcurrentHashMap<>();
 	public static  void  findProblemResource(String pUrl) {
+		if(pageMap.get(pUrl)!=null) {
+			return;
+		}
+		pageMap.put(pUrl, 1);
 		List<String> rs=PageUtils.getResourceUrls(pUrl);
 		List<CompletableFuture<Void>> futureList=new LinkedList<>();
 		List<PageResult>jscssFiles=new LinkedList<>();

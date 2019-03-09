@@ -46,7 +46,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  */
 public class JRJWebkitCrawler {
 	static   List<String> seeds=null;
-	static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
+	public static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
 	static File  ALL_PAGE_LINKS_FILE=new File("cache/links");
 	static {
 		//禁用Selenium的日志
