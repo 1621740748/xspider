@@ -71,6 +71,9 @@ public class JRJWebkitCrawler {
 				if(datum==null||datum.url()==null||datum.url()=="") {
 					return;
 				}
+				if(urlProccessed.get(datum.url())!=null) {
+					return;
+				}
 				urlProccessed.put(datum.url(), 1);
 				System.out.println(datum.url());
 				ProblemResourceService.findProblemResource(datum.url());
