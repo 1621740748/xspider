@@ -68,7 +68,7 @@ public class JRJWebkitCrawler {
 		Executor executor = new Executor() {
 			@Override
 			public void execute(CrawlDatum datum, CrawlDatums next) throws Exception {
-				if(datum==null||datum.url()==null) {
+				if(datum==null||datum.url()==null||datum.url()=="") {
 					return;
 				}
 				urlProccessed.put(datum.url(), 1);
@@ -77,11 +77,17 @@ public class JRJWebkitCrawler {
 				List<String>urls=ExtractUtils.extractLinksV2(datum.url());
 				if(urls!=null) {
 					List<String> 	filterUrls=urls.stream().filter(u->{
-						return seeds.stream().anyMatch(s->{
-							return u.startsWith(s);
-						});
-					}).filter(u->{
-						return !urlProccessed.containsKey(u);
+						if(urlProccessed.containsKey(u)) {
+							return false;
+						}
+						boolean ok=false;
+						for(String seed:seeds) {
+							if(u.startsWith(seed)) {
+								ok=true;
+								break;
+							}
+						}
+						return ok;
 					})
 							.collect(Collectors.toList());
 
