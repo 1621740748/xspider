@@ -47,6 +47,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
 public class JRJWebkitCrawler {
 	static   List<String> seeds=null;
 	public static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
+	public static volatile Map<String,Integer> added=new ConcurrentHashMap<>();
 	static File  ALL_PAGE_LINKS_FILE=new File("cache/links");
 	static {
 		//禁用Selenium的日志
@@ -81,7 +82,7 @@ public class JRJWebkitCrawler {
 				if(urls!=null) {
 					List<String> 	filterUrls=new LinkedList<>();
 					for(String u:urls) {
-						if(urlProccessed.containsKey(u)) {
+						if(added.containsKey(u)) {
 							continue;
 						}
 						boolean ok=false;
@@ -93,6 +94,7 @@ public class JRJWebkitCrawler {
 						}
 						if(ok) {
 							filterUrls.add(u);
+							added.put(u, 1);
 						}
 					};
 					next.add(filterUrls);

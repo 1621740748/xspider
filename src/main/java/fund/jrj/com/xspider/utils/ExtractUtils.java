@@ -18,7 +18,6 @@ public class ExtractUtils {
 	public static Map<String, Boolean> hostHttpsMap = new HashMap<>();
 	public static final Integer MAX_INFOSIZE = 2048;
 	public static Pattern HTTPURL = Pattern.compile("(http://(?:[a-z,A-Z,0-9]+\\.){1,6}[^\"\'\\s]+)"); // 正则表达式
-    private static final  Map<String,Integer> urlMap=new ConcurrentHashMap<>();
 	private static String getBaseURL(String url) {
 		try {
 			URL u = new URL(url);
@@ -113,10 +112,6 @@ public class ExtractUtils {
 
 	public static List<String> extractLinksV2(String url) {
 		List<String> result = new LinkedList<>();
-		if(urlMap.get(url)!=null) {
-			return result;
-		}
-		urlMap.put(url, 1);
 		if (StringUtils.isBlank(url)) {
 			return result;
 		}

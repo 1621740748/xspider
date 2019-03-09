@@ -27,12 +27,7 @@ public class ProblemResourceService {
 	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(20);
 	private static     RateLimiter limiter = RateLimiter.create(200);
 	private static final  Map<String,Integer> urlMap=new ConcurrentHashMap<>();
-	private static final  Map<String,Integer> pageMap=new ConcurrentHashMap<>();
 	public static  void  findProblemResource(String pUrl) {
-		if(pageMap.get(pUrl)!=null) {
-			return;
-		}
-		pageMap.put(pUrl, 1);
 		List<String> rs=PageUtils.getResourceUrls(pUrl);
 		List<CompletableFuture<Void>> futureList=new LinkedList<>();
 		List<PageResult>jscssFiles=new LinkedList<>();
