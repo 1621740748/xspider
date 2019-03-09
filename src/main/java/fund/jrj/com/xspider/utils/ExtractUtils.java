@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
 public class ExtractUtils {
 	public static Map<String, Boolean> hostHttpsMap = new HashMap<>();
 	public static final Integer MAX_INFOSIZE = 2048;
@@ -76,6 +78,18 @@ public class ExtractUtils {
 		}
 		return "";
 	}
+	public static String getPath(String url) {
+		if(StringUtils.isBlank(url)) {
+			return "";
+		}
+		try {
+			URL u=new URL(url);
+			return u.getPath();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 	private static boolean isJRJHost(String host) {
 		if (host.endsWith(".jrj.com.cn") || host.endsWith(".jrjimg.cn")) {
 			return true;
@@ -107,6 +121,9 @@ public class ExtractUtils {
 		HtmlUnitDriver driver = new HtmlUnitDriver();
 		driver.setJavascriptEnabled(true);
 		driver.get(url);
+		//保存html dom
+		String content=driver.getPageSource();
+		OkhttpUtils.getInstance().storeHtml(url, content);
 		List<WebElement> webElements = driver.findElementsByTagName("a");
 		if(webElements!=null) {
 			webElements.stream().forEach(e->{

@@ -19,7 +19,9 @@ package fund.jrj.com.xspider;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -44,6 +46,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  */
 public class JRJWebkitCrawler {
 	static   List<String> seeds=null;
+	static Map<String,Integer> urlProccessed=new HashMap<>();
 	static {
 		//禁用Selenium的日志
 		Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
@@ -67,6 +70,7 @@ public class JRJWebkitCrawler {
 				if(datum==null||datum.url()==null) {
 					return;
 				}
+				urlProccessed.put(datum.url(), 1);
 				System.out.println(datum.url());
 				ProblemResourceService.findProblemResource(datum.url());
 				List<String>urls=ExtractUtils.extractLinksV2(datum.url());
@@ -75,7 +79,10 @@ public class JRJWebkitCrawler {
 						return seeds.stream().anyMatch(s->{
 							return u.contains(s);
 						});
-					}).collect(Collectors.toList());
+					}).filter(u->{
+						return !urlProccessed.containsKey(u);
+					})
+							.collect(Collectors.toList());
 
 					next.add(filterUrls);
 				}
@@ -92,9 +99,9 @@ public class JRJWebkitCrawler {
 				crawler.addSeed(seed.trim());
 			}
 		}
-		crawler.setThreads(5);
+		crawler.setThreads(10);
 		crawler.getConf().setExecuteInterval(200);
-		crawler.start(7);
+		crawler.start(6);
 	}
 
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.util.concurrent.RateLimiter;
 
@@ -23,7 +24,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
 import fund.jrj.com.xspider.utils.OkhttpUtils;
 import fund.jrj.com.xspider.utils.PageUtils;
 public class ProblemResourceService {
-	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(8);
+	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(20);
 	private static     RateLimiter limiter = RateLimiter.create(200);
     private static Map<String,Integer> ImageUrlMap=new HashMap<>();
     private static Map<String,Integer> urlMap=new HashMap<>();
@@ -111,10 +112,11 @@ public class ProblemResourceService {
 			//找出在html中自动加载的资源
 			 PageResult page = futureHttps.get();
              resList.parallelStream().forEach(r->{
-            	 if(page.getOk()==1&&page.getType()==1&&page.getContent()!=null&&page.getContent().indexOf(r.getUrl())!=-1) {
+            	 String hostPath=ExtractUtils.getHostAndPath(r.getUrl());
+            	 if(page.getOk()==1&&page.getType()==1&&page.getContent()!=null&&StringUtils.isNotBlank(hostPath)&&page.getContent().indexOf(hostPath)!=-1) {
             		 r.setLoadType(1);
             	 }else {
-            		 r.setLoadType(0);
+            		 r.setLoadType(2);
             	 }
              });
 		} catch (InterruptedException e) {
