@@ -77,7 +77,7 @@ public class JRJWebkitCrawler {
 				if(urls!=null) {
 					List<String> 	filterUrls=urls.stream().filter(u->{
 						return seeds.stream().anyMatch(s->{
-							return u.contains(s);
+							return u.startsWith(s);
 						});
 					}).filter(u->{
 						return !urlProccessed.containsKey(u);
