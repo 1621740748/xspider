@@ -31,8 +31,8 @@ public class OkhttpUtils {
 				.Builder()
 				.connectTimeout(2, TimeUnit.SECONDS)
 				.readTimeout(2, TimeUnit.SECONDS)
-                .sslSocketFactory(SSLSocketClient.getSSLSocketFactory())//配置
-                .hostnameVerifier(SSLSocketClient.getHostnameVerifier())//配置
+				.sslSocketFactory(SSLSocketClient.getSSLSocketFactory())//配置
+				.hostnameVerifier(SSLSocketClient.getHostnameVerifier())//配置
 				.build();
 	}
 
@@ -44,7 +44,7 @@ public class OkhttpUtils {
 		return okhttpUtils;
 	}
 
-	
+
 	/**
 	 * GET请求
 	 *
@@ -144,32 +144,32 @@ public class OkhttpUtils {
 
 	}
 	public void storeHtml(String url,String content) {
-		    if(StringUtils.isBlank(url)) {
-		    	return;
-		    }
-		    String path=ExtractUtils.getPath(url);
+		try {
+			if(StringUtils.isBlank(url)) {
+				return;
+			}
+			String path=ExtractUtils.getPath(url);
 			String hash=DigestUtils.md5Hex(url);
 			File file=null;
-		    if(StringUtils.isNotBlank(path)) {
-		        File f=new File(cacheHtmlDir+path);
-		        if(path.endsWith("/")) {
-		        	if(!f.exists()) {
-		        		f.mkdirs();
-		        	}
-	        		file=new File(cacheHtmlDir+path+hash);
-		        }else {
-		        	path=f.getParent();
-		        	String name=f.getName();
-		        	File p=new File(path);
-		        	if(!p.exists()) {
-		        		p.mkdirs();
-		        	}
-		        	file=new File(path+File.separator+hash+"_"+name);
-		        }
-		    }else {
-		    	file=new File(cacheHtmlDir+hash);
-		    }
-		
+			if(StringUtils.isNotBlank(path)) {
+				File f=new File(cacheHtmlDir+path);
+				if(path.endsWith("/")) {
+					if(!f.exists()) {
+						f.mkdirs();
+					}
+					file=new File(cacheHtmlDir+path+hash);
+				}else {
+					path=f.getParent();
+					File p=new File(path);
+					if(!p.exists()) {
+						p.mkdirs();
+					}
+					file=new File(path+File.separator+hash);
+				}
+			}else {
+				file=new File(cacheHtmlDir+hash);
+			}
+
 			if(!file.exists()) {
 				try {
 					FileUtils.writeByteArrayToFile(file, content.getBytes("utf-8"));
@@ -177,39 +177,42 @@ public class OkhttpUtils {
 					e.printStackTrace();
 				}
 			}
+		}catch(Exception e) {
+
+		}
 	}
 	public  PageResult getUrl(String url) {
 		PageResult result=this.getUrlFromCache(url);
 		if(result!=null) {
 			return result;
 		}
-        Request request = new Request.Builder().url(url)
-                .get().build();
-        Call call = okHttpClient.newCall(request);
-        result=new PageResult();
-        result.setUrl(url);
-        try {
-            Response response = call.execute();
-            result.setOk(0);
-            if(response.isSuccessful()) {
-            	result.setOk(1);
-            	String type=response.body().contentType().type();
-            	if(type!=null&&type.equals("text")) {
-            		result.setType(1);
-            		result.setContent(response.body().string());
-            		result.setImage(null);
-            	}else if(type!=null&&type.equals("image")) {
-            		result.setType(2);
-            		result.setContent(null);
-            		result.setImage(response.body().bytes());
-            	}
-            }
-            response.close();
-           
-        } catch (Exception e) {
-           // e.printStackTrace();
-        }
-        this.storeUrlToCache(result);
+		Request request = new Request.Builder().url(url)
+				.get().build();
+		Call call = okHttpClient.newCall(request);
+		result=new PageResult();
+		result.setUrl(url);
+		try {
+			Response response = call.execute();
+			result.setOk(0);
+			if(response.isSuccessful()) {
+				result.setOk(1);
+				String type=response.body().contentType().type();
+				if(type!=null&&type.equals("text")) {
+					result.setType(1);
+					result.setContent(response.body().string());
+					result.setImage(null);
+				}else if(type!=null&&type.equals("image")) {
+					result.setType(2);
+					result.setContent(null);
+					result.setImage(response.body().bytes());
+				}
+			}
+			response.close();
+
+		} catch (Exception e) {
+			// e.printStackTrace();
+		}
+		this.storeUrlToCache(result);
 		return result;
 	}
 
