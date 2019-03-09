@@ -26,8 +26,7 @@ import fund.jrj.com.xspider.utils.PageUtils;
 public class ProblemResourceService {
 	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(20);
 	private static     RateLimiter limiter = RateLimiter.create(200);
-    private static Map<String,Integer> ImageUrlMap=new HashMap<>();
-    private static Map<String,Integer> urlMap=new HashMap<>();
+	private static Map<String,Integer> urlMap=new HashMap<>();
 	public static  void  findProblemResource(String pUrl) {
 		List<String> rs=PageUtils.getResourceUrls(pUrl);
 		List<CompletableFuture<Void>> futureList=new LinkedList<>();
@@ -41,52 +40,57 @@ public class ProblemResourceService {
 			prbo.setPageUrl(pUrl);
 			prbo.setResHash(hash);
 			prList.add(prbo);
-			//如果是图像并且已经访问过，则不必再访问
-			if(ImageUrlMap.get(hash)!=null) {
-				continue;
-			}
-	        if(urlMap.get(hash)!=null) {
-	        	continue;
-	        }
-			CompletableFuture<Void> future=CompletableFuture.supplyAsync(()->{
-				limiter.acquire();
-				PageResult p=OkhttpUtils.getInstance().getUrl(url);
-				if(p!=null&&p.getType()!=1) {
-					ImageUrlMap.put(hash, p.getOk());
-				}
-				return p;
-			},fixedThreadPool).thenAcceptAsync(pr->{
+			if(urlMap.get(hash)==null) {
+
+				CompletableFuture<Void> future=CompletableFuture.supplyAsync(()->{
+					limiter.acquire();
+					PageResult p=OkhttpUtils.getInstance().getUrl(url);
+					return p;
+				},fixedThreadPool).thenAcceptAsync(pr->{
+					Resources res=new Resources();
+					res.setUrl(pr.getUrl());
+					res.setHost(ExtractUtils.getHost(pr.getUrl()));
+					res.setHostPath(ExtractUtils.getHostAndPath(pr.getUrl()));
+					if(pr.getUrl().startsWith("http://")) {
+						PageResult p=pr;
+						if(p.getOk()==1&&p.getType()==1) {
+							jscssFiles.add(p);
+						}
+						res.setHttpEnable(p.getOk());
+						PageResult p1=OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("http://", "https://"));
+						res.setHttpsEnable(p1.getOk());
+						res.setTheSame(p.equals(p1)?1:0);
+					}else if (pr.getUrl().startsWith("https://")) {
+						PageResult p=pr;
+						if(p.getOk()==1 &&p.getType()==1) {
+							jscssFiles.add(p);
+						}
+						res.setHttpsEnable(p.getOk());
+						PageResult p1=OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("https://", "http://"));
+						res.setHttpEnable(p1.getOk());
+						res.setTheSame(p.equals(p1)?1:0);
+					}
+					resList.add(res);
+					urlMap.put(hash, res.getHttpEnable()<<2&res.getHttpEnable()<<1&res.getTheSame()&0x111);
+				},fixedThreadPool);
+				futureList.add(future);
+			}else {
 				Resources res=new Resources();
-				res.setUrl(pr.getUrl());
-				res.setHost(ExtractUtils.getHost(pr.getUrl()));
-				res.setHostPath(ExtractUtils.getHostAndPath(pr.getUrl()));
-				if(pr.getUrl().startsWith("http://")) {
-					PageResult p=pr;
-					if(p.getOk()==1&&p.getType()==1) {
-						jscssFiles.add(p);
-					}
-					res.setHttpEnable(p.getOk());
-					PageResult p1=OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("http://", "https://"));
-					res.setHttpsEnable(p1.getOk());
-					res.setTheSame(p.equals(p1)?1:0);
-				}else if (pr.getUrl().startsWith("https://")) {
-					PageResult p=pr;
-					if(p.getOk()==1 &&p.getType()==1) {
-						jscssFiles.add(p);
-					}
-					res.setHttpsEnable(p.getOk());
-					PageResult p1=OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("https://", "http://"));
-					res.setHttpEnable(p1.getOk());
-					res.setTheSame(p.equals(p1)?1:0);
+				res.setUrl(url);
+				res.setHost(ExtractUtils.getHost(url));
+				res.setHostPath(ExtractUtils.getHostAndPath(url));
+				Integer status=urlMap.get(hash);
+				if(status!=null) {
+				res.setHttpEnable(status&0x100);
+				res.setHttpsEnable(status&0x010);
+				res.setTheSame(status&0x001);
 				}
-				resList.add(res);
-				urlMap.put(hash, 1);
-			},fixedThreadPool);
-			futureList.add(future);
+			}
 		}
 		if(!futureList.isEmpty()) {
 			CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
 		}
+
 		CompletableFuture<PageResult> futureHttps=CompletableFuture.supplyAsync(()->{
 			PageResult page=OkhttpUtils.getInstance().getUrl(pUrl);
 			return page;
@@ -107,18 +111,18 @@ public class ProblemResourceService {
 				r.setProblemType(1);
 			}
 		});
-	
+
 		try {
 			//找出在html中自动加载的资源
-			 PageResult page = futureHttps.get();
-             resList.parallelStream().forEach(r->{
-            	 String hostPath=ExtractUtils.getHostAndPath(r.getUrl());
-            	 if(page.getOk()==1&&page.getType()==1&&page.getContent()!=null&&StringUtils.isNotBlank(hostPath)&&page.getContent().indexOf(hostPath)!=-1) {
-            		 r.setLoadType(1);
-            	 }else {
-            		 r.setLoadType(2);
-            	 }
-             });
+			PageResult page = futureHttps.get();
+			resList.parallelStream().forEach(r->{
+				String hostPath=ExtractUtils.getHostAndPath(r.getUrl());
+				if(page.getOk()==1&&page.getType()==1&&page.getContent()!=null&&StringUtils.isNotBlank(hostPath)&&page.getContent().indexOf(hostPath)!=-1) {
+					r.setLoadType(1);
+				}else {
+					r.setLoadType(2);
+				}
+			});
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (ExecutionException e) {
