@@ -35,7 +35,6 @@ import cn.edu.hfut.dmic.webcollector.fetcher.Executor;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
-import fund.jrj.com.xspider.service.ProblemResourceService;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 
 
@@ -44,11 +43,11 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  *
  * @author hu
  */
-public class JRJWebkitCrawler {
+public class JRJSiteMapCrawler {
 	static   List<String> seeds=null;
 	public static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
 	public static volatile Map<String,Integer> added=new ConcurrentHashMap<>();
-	static File  ALL_PAGE_LINKS_FILE=new File("cache/links");
+	static File  ALL_PAGE_LINKS_FILE=new File("cache/links1");
 	static {
 		//禁用Selenium的日志
 		Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
@@ -56,7 +55,7 @@ public class JRJWebkitCrawler {
 
 		try {
 			seeds= FileUtils.readLines(
-					new File(JRJWebkitCrawler.class.getResource("").getPath()+"fund_seed3.txt")
+					new File(JRJSiteMapCrawler.class.getResource("").getPath()+"fund_seed3.txt")
 					,"utf-8");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -72,12 +71,8 @@ public class JRJWebkitCrawler {
 				if(datum==null||datum.url()==null||datum.url()=="") {
 					return;
 				}
-				if(urlProccessed.get(datum.url())!=null) {
-					return;
-				}
-				urlProccessed.put(datum.url(), 1);
 				System.out.println(datum.url());
-				ProblemResourceService.findProblemResource(datum.url());
+//				ProblemResourceService.findProblemResource(datum.url());
 				List<String>urls=ExtractUtils.extractLinksV2(datum.url());
 				if(urls!=null) {
 					List<String> 	filterUrls=new LinkedList<>();
@@ -114,8 +109,9 @@ public class JRJWebkitCrawler {
 				crawler.addSeed(seed.trim());
 			}
 		}
-		crawler.setThreads(10);
+		crawler.setThreads(5);
 		crawler.getConf().setExecuteInterval(200);
+		//crawler.getConf().set
 		crawler.start(6);
 	}
 
