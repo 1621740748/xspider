@@ -159,7 +159,7 @@ public class OkhttpUtils {
 	        		file=new File(cacheHtmlDir+path+hash);
 		        }else {
 		        	path=f.getParent();
-		        	String name=file.getName();
+		        	String name=f.getName();
 		        	File p=new File(path);
 		        	if(!p.exists()) {
 		        		p.mkdirs();
