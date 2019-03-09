@@ -19,10 +19,10 @@ package fund.jrj.com.xspider;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -79,9 +79,10 @@ public class JRJWebkitCrawler {
 				ProblemResourceService.findProblemResource(datum.url());
 				List<String>urls=ExtractUtils.extractLinksV2(datum.url());
 				if(urls!=null) {
-					List<String> 	filterUrls=urls.stream().filter(u->{
+					List<String> 	filterUrls=new LinkedList<>();
+					for(String u:urls) {
 						if(urlProccessed.containsKey(u)) {
-							return false;
+							continue;
 						}
 						boolean ok=false;
 						for(String seed:seeds) {
@@ -90,10 +91,10 @@ public class JRJWebkitCrawler {
 								break;
 							}
 						}
-						return ok;
-					})
-							.collect(Collectors.toList());
-
+						if(ok) {
+							filterUrls.add(u);
+						}
+					};
 					next.add(filterUrls);
 					FileUtils.write(ALL_PAGE_LINKS_FILE, StringUtils.join(filterUrls,"\n"),"utf-8" ,true);
 					FileUtils.write(ALL_PAGE_LINKS_FILE, "\n","utf-8" ,true);
