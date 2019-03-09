@@ -84,6 +84,7 @@ public class ProblemResourceService {
 				res.setHttpEnable(status&0x100);
 				res.setHttpsEnable(status&0x010);
 				res.setTheSame(status&0x001);
+				resList.add(res);
 				}
 			}
 		}
