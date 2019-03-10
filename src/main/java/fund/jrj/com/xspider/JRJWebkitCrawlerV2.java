@@ -56,7 +56,7 @@ public class JRJWebkitCrawlerV2 {
 
 		try {
 			seeds= FileUtils.readLines(
-					new File(JRJWebkitCrawlerV2.class.getResource("").getPath()+"fund_seed4.txt")
+					new File(JRJWebkitCrawlerV2.class.getResource("").getPath()+"seeds5.txt")
 					,"utf-8");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
