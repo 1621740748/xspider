@@ -38,56 +38,57 @@ import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
 import fund.jrj.com.xspider.service.ProblemResourceService;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 
-
 /**
  * 本教程演示如何利用WebCollector爬取javascript生成的数据
  *
  * @author hu
  */
 public class JRJWebkitCrawlerV2 {
-	static   List<String> seeds=null;
-	public static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
-	public static volatile Map<String,Integer> added=new ConcurrentHashMap<>();
-	static File  ALL_PAGE_LINKS_FILE=new File("cache/links");
+	static List<String> seeds = null;
+	public static volatile Map<String, Integer> urlProccessed = new ConcurrentHashMap<>();
+	public static volatile Map<String, Integer> added = new ConcurrentHashMap<>();
+	static File ALL_PAGE_LINKS_FILE = new File("cache/links");
 	static {
-		//禁用Selenium的日志
+		// 禁用Selenium的日志
 		Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
 		logger.setLevel(Level.OFF);
 
 		try {
-			seeds= FileUtils.readLines(
-					new File(JRJWebkitCrawlerV2.class.getResource("").getPath()+"seeds5.txt")
-					,"utf-8");
+			seeds = FileUtils.readLines(new File(JRJWebkitCrawlerV2.class.getResource("").getPath() + "seeds5.txt"),
+					"utf-8");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-
 	public static void main(String[] args) throws Exception {
 		Executor executor = new Executor() {
 			@Override
 			public void execute(CrawlDatum datum, CrawlDatums next) throws Exception {
-				if(datum==null||datum.url()==null||datum.url()=="") {
-					return;
+				try {
+					if (datum == null || datum.url() == null || datum.url() == "") {
+						return;
+					}
+					if (urlProccessed.get(datum.url()) != null) {
+						return;
+					}
+					urlProccessed.put(datum.url(), 1);
+					System.out.println(datum.url());
+					ProblemResourceService.findProblemResource(datum.url());
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				if(urlProccessed.get(datum.url())!=null) {
-					return;
-				}
-				urlProccessed.put(datum.url(), 1);
-				System.out.println(datum.url());
-				ProblemResourceService.findProblemResource(datum.url());
 			}
 		};
-		//创建一个基于伯克利DB的DBManager
+		// 创建一个基于伯克利DB的DBManager
 		DBManager manager = new RocksDBManager("crawl");
 
-		//创建一个Crawler需要有DBManager和Executor
+		// 创建一个Crawler需要有DBManager和Executor
 
 		Crawler crawler = new Crawler(manager, executor);
-		for(String seed:seeds) {
-			if(StringUtils.isNotBlank(seed)) {
+		for (String seed : seeds) {
+			if (StringUtils.isNotBlank(seed)) {
 				crawler.addSeed(seed.trim());
 			}
 		}
