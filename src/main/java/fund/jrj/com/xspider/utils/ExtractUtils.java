@@ -120,8 +120,8 @@ public class ExtractUtils {
 		driver.setJavascriptEnabled(true);
 		driver.get(url);
 		//保存html dom
-		String content=driver.getPageSource();
-		OkhttpUtils.getInstance().storeHtml(url, content);
+	//	String content=driver.getPageSource();
+	//	OkhttpUtils.getInstance().storeHtml(url, content);
 		List<WebElement> webElements = driver.findElementsByTagName("a");
 		if(webElements!=null) {
 			webElements.stream().forEach(e->{

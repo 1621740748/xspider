@@ -82,10 +82,16 @@ public class RemoveDuplicateUtils {
 	}
 
 	public static void main(String[] args) throws IOException {
-		File links=new File("cache/links");
+		File links=new File("cache/links2");
 		List<String> files=FileUtils.readLines(links,"utf-8");
 		char[] seps= new char[] {'/','.',',','?','=','-'};
-		String[] rr=new String[] {"\\d+","0000000000000[0-9,a-z,A-Z]{5}","djdj\\d+","qnj\\d+","jjgc\\d+"};
+		String[] rr=new String[] {
+				"\\d+"
+				,"0000000000000[0-9,a-z,A-Z]{5}"
+				,"0000000010001[0-9,a-z,A-Z]{5}"
+				,"djdj\\d+","qnj\\d+"
+				,"jjgc\\d+"
+				};
 		//		System.out.println(StringUtils.join(files,"\n"));
 		RemoveDuplicateUtils rd=new RemoveDuplicateUtils(seps,rr);
 		//rules.add(0, "http://fund.jrj.com.cn/archives,\\\\d+,gg,[0-9,a-z,A-Z].shtml");

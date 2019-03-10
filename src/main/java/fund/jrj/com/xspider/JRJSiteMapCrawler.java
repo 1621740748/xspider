@@ -47,7 +47,7 @@ public class JRJSiteMapCrawler {
 	static   List<String> seeds=null;
 	public static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
 	public static volatile Map<String,Integer> added=new ConcurrentHashMap<>();
-	static File  ALL_PAGE_LINKS_FILE=new File("cache/links1");
+	static File  ALL_PAGE_LINKS_FILE=new File("cache/links2");
 	static {
 		//禁用Selenium的日志
 		Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
