@@ -5,6 +5,7 @@ from PySide.QtGui import QMainWindow
 from PySide.QtWebKit import QWebView, QWebPage
 from PySide.QtNetwork import QNetworkAccessManager
 import threading
+import time
 class Browser:
     def __init__(self, app):
         self.network_manager = QNetworkAccessManager()
@@ -29,7 +30,7 @@ class Browser:
 
     def myLoadFinish(self):
         # app.quit()
-        sleep(0.1)
+        time.sleep(0.1)
         sys.exit(0)
 if __name__ == '__main__':
     app = QApplication(sys.argv)
