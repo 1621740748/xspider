@@ -45,7 +45,7 @@ import fund.jrj.com.xspider.utils.ExtractUtils;
  */
 public class JRJSiteMapCrawlerV2 {
 	static   List<String> seeds=null;
-	public static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
+	//public static volatile Map<String,Integer> urlProccessed=new ConcurrentHashMap<>();
 	public static volatile Map<String,Integer> added=new ConcurrentHashMap<>();
 	static File  ALL_PAGE_LINKS_FILE=new File("cache/links3");
 	static {
