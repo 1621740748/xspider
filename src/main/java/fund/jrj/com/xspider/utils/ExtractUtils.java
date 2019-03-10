@@ -1,16 +1,20 @@
 package fund.jrj.com.xspider.utils;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
@@ -120,8 +124,8 @@ public class ExtractUtils {
 		driver.setJavascriptEnabled(true);
 		driver.get(url);
 		//保存html dom
-	//	String content=driver.getPageSource();
-	//	OkhttpUtils.getInstance().storeHtml(url, content);
+		//	String content=driver.getPageSource();
+		//	OkhttpUtils.getInstance().storeHtml(url, content);
 		List<WebElement> webElements = driver.findElementsByTagName("a");
 		if(webElements!=null) {
 			webElements.stream().forEach(e->{
@@ -134,7 +138,7 @@ public class ExtractUtils {
 				}
 			});
 		}
-		 webElements = driver.findElementsByTagName("iframe");
+		webElements = driver.findElementsByTagName("iframe");
 		if(webElements!=null) {
 			webElements.stream().forEach(e->{
 				if(e!=null&&StringUtils.isNotBlank(e.getAttribute("src"))) {
@@ -146,7 +150,7 @@ public class ExtractUtils {
 				}
 			});
 		}
-		 webElements = driver.findElementsByTagName("frame");
+		webElements = driver.findElementsByTagName("frame");
 		if(webElements!=null) {
 			webElements.stream().forEach(e->{
 				if(e!=null&&StringUtils.isNotBlank(e.getAttribute("src"))) {
@@ -157,6 +161,51 @@ public class ExtractUtils {
 					}
 				}
 			});
+		}
+		return result;
+	}
+	public static List<String> extractLinksV3(String url) {
+		List<String> result = new LinkedList<>();
+		if (StringUtils.isBlank(url)) {
+			return result;
+		}
+		String base = getBaseURL(url);
+		try
+		{
+			Document document = Jsoup.connect(url).get();
+			Elements links = document.select("a[href]");  
+			for (Element link : links) 
+			{
+
+				String href=link.attr("href");
+				String absUrl=ExtractUtils.getAbsUrl(base, href);
+				if(StringUtils.isNotBlank(absUrl)) {
+					result.add(absUrl);
+				}
+			}
+			links = document.select("frame[src]");  
+			for (Element link : links) 
+			{
+
+				String href=link.attr("src");
+				String absUrl=ExtractUtils.getAbsUrl(base, href);
+				if(StringUtils.isNotBlank(absUrl)) {
+					result.add(absUrl);
+				}
+			}
+			links = document.select("iframe[src]");  
+			for (Element link : links) 
+			{
+
+				String href=link.attr("src");
+				String absUrl=ExtractUtils.getAbsUrl(base, href);
+				if(StringUtils.isNotBlank(absUrl)) {
+					result.add(absUrl);
+				}
+			}
+		}catch (Exception e) 
+		{
+			e.printStackTrace();
 		}
 		return result;
 	}
