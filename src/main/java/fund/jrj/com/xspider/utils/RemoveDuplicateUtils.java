@@ -1,15 +1,11 @@
 package fund.jrj.com.xspider.utils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -72,7 +68,14 @@ public class RemoveDuplicateUtils {
 		Map<String,String>uses=new HashMap<>();
 		List<String> result=new LinkedList<>();
 		for(String f:files) {
-			String rule=this.toRule(f);
+			String fTrim=f;
+			if(fTrim.contains("?")) {
+				int index=fTrim.indexOf("?");
+				if(index>0) {
+					fTrim=fTrim.substring(0,index);
+				}
+			}
+			String rule=this.toRule(fTrim);
 			if(uses.get(rule)==null) {
 				uses.put(rule, "1");
 				result.add(f);
@@ -80,25 +83,5 @@ public class RemoveDuplicateUtils {
 		}
 		return result;
 	}
-
-	public static void main(String[] args) throws IOException {
-		File links=new File("cache/links2");
-		List<String> files=FileUtils.readLines(links,"utf-8");
-		char[] seps= new char[] {'/','.',',','?','=','-'};
-		String[] rr=new String[] {
-				"\\d+"
-				,"0000000000000[0-9,a-z,A-Z]{5}"
-				,"0000000010001[0-9,a-z,A-Z]{5}"
-				,"djdj\\d+","qnj\\d+"
-				,"jjgc\\d+"
-				};
-		//		System.out.println(StringUtils.join(files,"\n"));
-		RemoveDuplicateUtils rd=new RemoveDuplicateUtils(seps,rr);
-		//rules.add(0, "http://fund.jrj.com.cn/archives,\\\\d+,gg,[0-9,a-z,A-Z].shtml");
-		List<String> result=rd.tidyByRules(files);
-	   System.out.println(StringUtils.join(result,"\n"));
-	   System.out.println("result size:"+result.size());
-	   System.out.println("files size:"+files.size());
-}
 
 }
