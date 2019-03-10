@@ -78,29 +78,6 @@ public class JRJWebkitCrawlerV2 {
 				urlProccessed.put(datum.url(), 1);
 				System.out.println(datum.url());
 				ProblemResourceService.findProblemResource(datum.url());
-				List<String>urls=ExtractUtils.extractLinksV2(datum.url());
-				if(urls!=null) {
-					List<String> 	filterUrls=new LinkedList<>();
-					for(String u:urls) {
-						if(added.containsKey(u)) {
-							continue;
-						}
-						boolean ok=false;
-						for(String seed:seeds) {
-							if(u.startsWith(seed)) {
-								ok=true;
-								break;
-							}
-						}
-						if(ok) {
-							filterUrls.add(u);
-							added.put(u, 1);
-						}
-					};
-					next.add(filterUrls);
-					FileUtils.write(ALL_PAGE_LINKS_FILE, StringUtils.join(filterUrls,"\n")+"\n","utf-8" ,true);
-					//FileUtils.write(ALL_PAGE_LINKS_FILE, "\n","utf-8" ,true);
-				}
 			}
 		};
 		//创建一个基于伯克利DB的DBManager

@@ -197,10 +197,11 @@ public class OkhttpUtils {
 		}
 	}
 	public  PageResult getUrl(String url) {
-		PageResult result=this.getUrlFromCache(url);
-		if(result!=null) {
-			return result;
-		}
+		PageResult result=null;
+//		result=this.getUrlFromCache(url);
+//		if(result!=null) {
+//			return result;
+//		}
 		Request request = new Request.Builder().url(url)
 				.get().build();
 		Call call = okHttpClient.newCall(request);
@@ -227,7 +228,7 @@ public class OkhttpUtils {
 		} catch (Exception e) {
 			// e.printStackTrace();
 		}
-		this.storeUrlToCache(result);
+		//this.storeUrlToCache(result);
 		return result;
 	}
 
