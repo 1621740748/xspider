@@ -198,18 +198,17 @@ public class OkhttpUtils {
 	}
 	public  PageResult getUrl(String url) {
 		PageResult result=null;
-//		result=this.getUrlFromCache(url);
-//		if(result!=null) {
-//			return result;
-//		}
-		Request request = new Request.Builder().url(url)
-				.get().build();
-		Call call = okHttpClient.newCall(request);
 		result=new PageResult();
 		result.setUrl(url);
+		result.setOk(0);
 		try {
+			Request request = new Request.Builder().url(url)
+					.get().build();
+			Call call = okHttpClient.newCall(request);
+
+
 			Response response = call.execute();
-			result.setOk(0);
+	
 			if(response.isSuccessful()) {
 				result.setOk(1);
 				String type=response.body().contentType().type();
