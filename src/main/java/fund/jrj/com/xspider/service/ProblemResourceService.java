@@ -28,7 +28,7 @@ import fund.jrj.com.xspider.utils.OkhttpUtils;
 import fund.jrj.com.xspider.utils.PageUtils;
 public class ProblemResourceService {
 	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(20);
-	private static     RateLimiter limiter = RateLimiter.create(200);
+	private static     RateLimiter limiter = RateLimiter.create(10);
 	private static final  Map<String,Integer> urlMap=new ConcurrentHashMap<>();
 	private static File logFile=new File("cache/link_log");
 	public static  void  findProblemResource(String pUrl) {

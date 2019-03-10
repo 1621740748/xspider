@@ -54,7 +54,7 @@ public class JRJWebkitCrawlerV2 {
 		logger.setLevel(Level.OFF);
 
 		try {
-			seeds = FileUtils.readLines(new File(JRJWebkitCrawlerV2.class.getResource("").getPath() + "seeds5.txt"),
+			seeds = FileUtils.readLines(new File(JRJWebkitCrawlerV2.class.getResource("").getPath() + "seeds6.txt"),
 					"utf-8");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -92,7 +92,7 @@ public class JRJWebkitCrawlerV2 {
 				crawler.addSeed(seed.trim());
 			}
 		}
-		crawler.setThreads(10);
+		crawler.setThreads(5);
 		crawler.getConf().setExecuteInterval(200);
 		crawler.start(1);
 	}
