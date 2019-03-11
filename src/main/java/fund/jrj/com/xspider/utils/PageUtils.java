@@ -13,7 +13,7 @@ public class PageUtils {
 		Process p = null;
 		try {
 			//打印所有url自动加载的资源
-			String path="python "+PageUtils.class.getResource("").getPath()+"br1.py "+pUrl;
+			String path="python "+PageUtils.class.getResource("").getPath()+"br1.py '"+pUrl.trim()+"'";
 			p = Runtime.getRuntime().exec(path);
 			p.waitFor();
 			//用流读出来
@@ -48,7 +48,7 @@ public class PageUtils {
 		Process p = null;
 		try {
 			//打印所有url自动加载的资源
-			String path="/usr/bin/phantomjs  "+PageUtils.class.getResource("").getPath()+"n1.js "+pUrl;
+			String path="/usr/bin/phantomjs  "+PageUtils.class.getResource("").getPath()+"n1.js '"+pUrl.trim()+"'";
 			p = Runtime.getRuntime().exec(path);
 			p.waitFor();
 			//用流读出来
