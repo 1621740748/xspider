@@ -54,7 +54,7 @@ public class JRJWebkitCrawlerV2 {
 		logger.setLevel(Level.OFF);
 
 		try {
-			seeds = FileUtils.readLines(new File(JRJWebkitCrawlerV2.class.getResource("").getPath() + "seeds7.txt"),
+			seeds = FileUtils.readLines(new File(JRJWebkitCrawlerV2.class.getResource("").getPath() + "seeds6.txt"),
 					"utf-8");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
