@@ -30,7 +30,6 @@ import fund.jrj.com.xspider.utils.PageUtils;
 public class ProblemResourceService {
 	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(30);
 	private static RateLimiter limiter = RateLimiter.create(30);
-	private static final Map<String, Integer> urlMap = new ConcurrentHashMap<>();
 	private static File logFile = new File("cache/link_log");
 
 	public static void findProblemResource(String pUrl) {
@@ -51,54 +50,38 @@ public class ProblemResourceService {
 			prbo.setPageUrl(pUrl);
 			prbo.setResHash(hash);
 			prList.add(prbo);
-			if (urlMap.get(hash) == null) {
-
-				CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
-					limiter.acquire();
-					PageResult p = OkhttpUtils.getInstance().getUrl(url);
-					return p;
-				}, fixedThreadPool).thenAcceptAsync(pr -> {
-					Resources res = new Resources();
-					res.setUrl(pr.getUrl());
-					res.setHost(ExtractUtils.getHost(pr.getUrl()));
-					res.setHostPath(ExtractUtils.getHostAndPath(pr.getUrl()));
-					if (pr.getUrl().startsWith("http://")) {
-						PageResult p = pr;
-						if (p.getOk() == 1 && p.getType() == 1) {
-							jscssFiles.add(p);
-						}
-						res.setHttpEnable(p.getOk());
-						PageResult p1 = OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("http://", "https://"));
-						res.setHttpsEnable(p1.getOk());
-						res.setTheSame(p.equals(p1) ? 1 : 0);
-					} else if (pr.getUrl().startsWith("https://")) {
-						PageResult p = pr;
-						if (p.getOk() == 1 && p.getType() == 1) {
-							jscssFiles.add(p);
-						}
-						res.setHttpsEnable(p.getOk());
-						PageResult p1 = OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("https://", "http://"));
-						res.setHttpEnable(p1.getOk());
-						res.setTheSame(p.equals(p1) ? 1 : 0);
+			CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+				limiter.acquire();
+				PageResult p = OkhttpUtils.getInstance().getUrl(url);
+				return p;
+			}, fixedThreadPool).thenAcceptAsync(pr -> {
+				Resources res = new Resources();
+				res.setUrl(pr.getUrl());
+				res.setHost(ExtractUtils.getHost(pr.getUrl()));
+				res.setHostPath(ExtractUtils.getHostAndPath(pr.getUrl()));
+				if (pr.getUrl().startsWith("http://")) {
+					PageResult p = pr;
+					if (p.getOk() == 1 && p.getType() == 1) {
+						jscssFiles.add(p);
 					}
-					resList.add(res);
-					urlMap.put(hash, res.getHttpEnable() << 2 | res.getHttpsEnable() << 1 | res.getTheSame() & 0b111);
-				}, fixedThreadPool);
-				futureList.add(future);
-			} else {
-				Integer status = urlMap.get(hash);
-				if (status != null) {
-					Resources res = new Resources();
-					res.setUrl(url);
-					res.setHost(ExtractUtils.getHost(url));
-					res.setHostPath(ExtractUtils.getHostAndPath(url));
-					res.setHttpEnable((status & 0b100) >> 2);
-					res.setHttpsEnable((status & 0b010) >> 1);
-					res.setTheSame(status & 0b001);
-					res.setHash(hash);
-					resList.add(res);
+					res.setHttpEnable(p.getOk());
+					PageResult p1 = OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("http://", "https://"));
+					res.setHttpsEnable(p1.getOk());
+					res.setTheSame(p.equals(p1) ? 1 : 0);
+				} else if (pr.getUrl().startsWith("https://")) {
+					PageResult p = pr;
+					if (p.getOk() == 1 && p.getType() == 1) {
+						jscssFiles.add(p);
+					}
+					res.setHttpsEnable(p.getOk());
+					PageResult p1 = OkhttpUtils.getInstance().getUrl(pr.getUrl().replace("https://", "http://"));
+					res.setHttpEnable(p1.getOk());
+					res.setTheSame(p.equals(p1) ? 1 : 0);
 				}
-			}
+				resList.add(res);
+			}, fixedThreadPool);
+			futureList.add(future);
+
 		}
 		if (!futureList.isEmpty()) {
 			CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
