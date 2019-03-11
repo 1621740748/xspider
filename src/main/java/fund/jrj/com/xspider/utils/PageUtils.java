@@ -23,7 +23,9 @@ public class PageUtils {
 			//跳过第一行
 			buff.readLine();
 			while ((temp=buff.readLine())!=null) {
-				resultList.add(temp);
+				if(temp.startsWith("https://")||temp.startsWith("http://")) {
+					resultList.add(temp);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -56,7 +58,9 @@ public class PageUtils {
 			//跳过第一行
 			buff.readLine();
 			while ((temp=buff.readLine())!=null) {
-				resultList.add(temp);
+				if(temp.startsWith("https://")||temp.startsWith("http://")) {
+					resultList.add(temp);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
