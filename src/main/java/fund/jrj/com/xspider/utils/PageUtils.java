@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class PageUtils {
 	public static List<String> getResourceUrls(String pUrl){
 		List<String> resultList=new LinkedList<>();
@@ -13,7 +15,7 @@ public class PageUtils {
 		Process p = null;
 		try {
 			//打印所有url自动加载的资源
-			String path="python "+PageUtils.class.getResource("").getPath()+"br1.py '"+pUrl.trim()+"'";
+			String path="python "+PageUtils.class.getResource("").getPath()+"br1.py "+pUrl.trim();
 			p = Runtime.getRuntime().exec(path);
 			p.waitFor();
 			//用流读出来
@@ -48,7 +50,7 @@ public class PageUtils {
 		Process p = null;
 		try {
 			//打印所有url自动加载的资源
-			String path="/usr/bin/phantomjs  "+PageUtils.class.getResource("").getPath()+"n1.js '"+pUrl.trim()+"'";
+			String path="/usr/bin/phantomjs  "+PageUtils.class.getResource("").getPath()+"n1.js "+pUrl.trim();
 			p = Runtime.getRuntime().exec(path);
 			p.waitFor();
 			//用流读出来
@@ -77,4 +79,9 @@ public class PageUtils {
 		}
 		return resultList;
 	}	
+	public static void main(String[]args) {
+		String url="http://fund.jrj.com.cn";
+		List<String> results=PageUtils.getResourceUrls(url);
+		System.out.println(StringUtils.join(results,"\n"));
+	}
 }
