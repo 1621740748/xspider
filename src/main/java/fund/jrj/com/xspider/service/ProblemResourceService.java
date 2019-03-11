@@ -10,10 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.util.StringUtil;
 
 import com.google.common.util.concurrent.RateLimiter;
 
@@ -44,6 +46,9 @@ public class ProblemResourceService {
 		List<Resources> resList = new LinkedList<>();
 		List<PageResources> prList = new LinkedList<>();
 		for (String url : rs) {
+			if(StringUtil.isBlank(url)) {
+				continue;
+			}
 			String hash = DigestUtils.sha384Hex(url);
 			PageResources prbo = new PageResources();
 			prbo.setPageType(1);
@@ -126,9 +131,9 @@ public class ProblemResourceService {
 			e.printStackTrace();
 		}
 		ResourcesDao resDao = DBUtils.getInstance().create(ResourcesDao.class);
-		resDao.add(resList);
+		resDao.add(resList.stream().filter(r->r!=null).collect(Collectors.toList()));
 		PageResourcesDao prDao = DBUtils.getInstance().create(PageResourcesDao.class);
-		prDao.add(prList);
+		prDao.add(prList.stream().filter(r->r!=null).collect(Collectors.toList()));
 	}
 
 	public static void findProblemResourceV3(String pUrl) {
@@ -143,6 +148,9 @@ public class ProblemResourceService {
 		List<Resources> resList = new LinkedList<>();
 		List<PageResources> prList = new LinkedList<>();
 		for (String url : rs) {
+			if(StringUtil.isBlank(url)) {
+				continue;
+			}
 			String hash = DigestUtils.sha384Hex(url);
 			PageResources prbo = new PageResources();
 			prbo.setPageType(1);
@@ -226,9 +234,9 @@ public class ProblemResourceService {
 			e.printStackTrace();
 		}
 		ResourcesDao resDao = DBUtils.getInstance().create(ResourcesDao.class);
-		resDao.add(resList);
+		resDao.add(resList.stream().filter(r->r!=null).collect(Collectors.toList()));
 		PageResourcesDao prDao = DBUtils.getInstance().create(PageResourcesDao.class);
-		prDao.add(prList);
+		prDao.add(prList.stream().filter(r->r!=null).collect(Collectors.toList()));
 	}
 
 	public static void main(String[] args) {
