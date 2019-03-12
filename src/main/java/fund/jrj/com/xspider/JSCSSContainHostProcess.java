@@ -8,9 +8,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import fund.jrj.com.xspider.bo.JscssContains;
-import fund.jrj.com.xspider.bo.PageLink;
+import fund.jrj.com.xspider.bo.PageLink1;
 import fund.jrj.com.xspider.dao.JscssContainsDao;
-import fund.jrj.com.xspider.dao.PageLinkDao;
+import fund.jrj.com.xspider.dao.PageLink1Dao;
 import fund.jrj.com.xspider.utils.DBUtils;
 
 public class JSCSSContainHostProcess {
@@ -27,12 +27,12 @@ public class JSCSSContainHostProcess {
 		return result;
 	}
 	public static void main(String[] args) {
-		PageLinkDao plDao=DBUtils.getInstance().create(PageLinkDao.class);
-		List<PageLink> pls=plDao.selectHttpExists();
+		PageLink1Dao plDao=DBUtils.getInstance().create(PageLink1Dao.class);
+		List<PageLink1> pls=plDao.selectHttpExists();
 		List<JscssContains> result=new LinkedList<>();
 		JscssContainsDao jDao=DBUtils.getInstance().create(JscssContainsDao.class);
 		int i=0;
-		for(PageLink p:pls) {
+		for(PageLink1 p:pls) {
 			JscssContains jc=new JscssContains();
 			List<String> hosts=extractHosts(p.getHttpExistContent());
 			for(String host:hosts) {

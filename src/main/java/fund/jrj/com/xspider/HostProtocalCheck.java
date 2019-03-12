@@ -1,11 +1,11 @@
 package fund.jrj.com.xspider;
 
-import fund.jrj.com.xspider.bo.PageLink;
+import fund.jrj.com.xspider.bo.PageLink1;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 
 public class HostProtocalCheck  implements Runnable{
-	private PageLink pl;
-	public HostProtocalCheck(PageLink p) {
+	private PageLink1 pl;
+	public HostProtocalCheck(PageLink1 p) {
 		pl=p;
 	}
 	public void run() {

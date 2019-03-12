@@ -31,9 +31,9 @@ import cn.edu.hfut.dmic.webcollector.fetcher.Executor;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
-import fund.jrj.com.xspider.bo.PageLink;
+import fund.jrj.com.xspider.bo.PageLink1;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
-import fund.jrj.com.xspider.dao.PageLinkDao;
+import fund.jrj.com.xspider.dao.PageLink1Dao;
 import fund.jrj.com.xspider.utils.DBUtils;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 
@@ -58,8 +58,8 @@ public class JRJSeleniumCrawler {
             	if(datum==null||datum.url()==null) {
             		return;
             	}
-                List<PageLink> links=ExtractUtils.extractLinks(datum.url());
-                for(PageLink pl:links) {
+                List<PageLink1> links=ExtractUtils.extractLinks(datum.url());
+                for(PageLink1 pl:links) {
                 	if(pl.getPageType()==PageTypeEnum.HTML.getPageType()) {
                 		if(pl.getLinkUrl().startsWith("http://fund.jrj.com.cn")
                 			&&StringUtils.isNotBlank(pl.getLinkParentUrl())
@@ -70,13 +70,13 @@ public class JRJSeleniumCrawler {
                 	}
         			String host = ExtractUtils.getHost(pl.getLinkUrl());
         			//检查资源是否包含http写死的情况
-        			if (pl.getPageType() == PageTypeEnum.CSS.getPageType()
-        					||pl.getPageType()==PageTypeEnum.JS.getPageType()) {
+        			if (
+        					pl.getPageType()==PageTypeEnum.JS.getPageType()) {
         	
         				ExtractUtils.checkJscssExistHttp(pl);
         			}
                 }
-            	PageLinkDao plDao=DBUtils.getInstance().create(PageLinkDao.class);
+            	PageLink1Dao plDao=DBUtils.getInstance().create(PageLink1Dao.class);
             	plDao.add(links);
             }
         };

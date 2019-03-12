@@ -13,14 +13,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import com.alibaba.fastjson.JSON;
 
-import fund.jrj.com.xspider.HostProtocalCheck;
 import fund.jrj.com.xspider.bo.HttpResources;
-import fund.jrj.com.xspider.bo.PageLink;
+import fund.jrj.com.xspider.bo.PageLink1;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
 import fund.jrj.com.xspider.dao.HttpResourcesDao;
 import okhttp3.Call;
@@ -28,7 +31,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class ExtractUtils {
-    private static ExecutorService protocalCheckExecutor = Executors.newFixedThreadPool(2);
+	private static ExecutorService protocalCheckExecutor = Executors.newFixedThreadPool(2);
 	public static Map<String, Boolean> hostHttpsMap = new HashMap<>();
 	public static final Integer MAX_INFOSIZE = 2048;
 	public static Pattern HTTPURL = Pattern.compile("(http://(?:[a-z,A-Z,0-9]+\\.){1,6}[^\"\'\\s]+)"); // 正则表达式
@@ -68,7 +71,7 @@ public class ExtractUtils {
 		return base + "/" + uri;
 	}
 
-	public static void checkHostSupportProtocal(String url, String host, PageLink pl) {
+	public static void checkHostSupportProtocal(String url, String host, PageLink1 pl) {
 		if (StringUtils.isBlank(url)) {
 			return;
 		}
@@ -99,17 +102,17 @@ public class ExtractUtils {
 
 	}
 
-	private static List<PageLink> getAddUrl(List<WebElement> webElements, Integer pageType, String base,
+	private static List<PageLink1> getAddUrl(List<Element> webElements, Integer pageType, String base,
 			String parentUrl) {
-		List<PageLink> addList = new LinkedList<>();
-		for (WebElement we : webElements) {
-			PageLink p = new PageLink();
+		List<PageLink1> addList = new LinkedList<>();
+		for (Element we : webElements) {
+			PageLink1 p = new PageLink1();
 			p.setPageType(pageType);
 			String u = null;
 			if (pageType == PageTypeEnum.CSS.getPageType() || pageType == PageTypeEnum.HTML.getPageType()) {
-				u = we.getAttribute("href");
+				u = we.attr("href");
 			} else if (pageType == PageTypeEnum.JS.getPageType() || pageType == PageTypeEnum.IMG.getPageType()) {
-				u = we.getAttribute("src");
+				u = we.attr("src");
 			}
 			if (u != null && u.startsWith("//")) {
 				p.setAutoAdapt(1);
@@ -164,11 +167,11 @@ public class ExtractUtils {
 	 * 
 	 * @param pl
 	 */
-	public static void checkJscssExistHttp(final PageLink pl) {
+	public static void checkJscssExistHttp(final PageLink1 pl) {
 		// 检查是否已经分析过该资源
 		String value = RockUtils.get(pl.getLinkUrl());
 		if (StringUtils.isNotBlank(value)) {
-			PageLink temp = JSON.parseObject(value, PageLink.class);
+			PageLink1 temp = JSON.parseObject(value, PageLink1.class);
 			pl.setHttpExist(temp.getHttpExist());
 			pl.setHttpExistContent(temp.getHttpExistContent());
 			return;
@@ -202,67 +205,110 @@ public class ExtractUtils {
 
 	}
 
-	private static String joinHttpUrls(List<PageLink> pls) {
+	private static String joinHttpUrls(List<PageLink1> pls) {
 		StringBuilder r = new StringBuilder();
-		for (PageLink p : pls) {
+		for (PageLink1 p : pls) {
 			r.append(p.getLinkUrl());
 			r.append("\n");
 		}
 		String result = r.toString();
 		return StringUtils.strip(result, "\n");
 	}
+	public static List<String> extractLinksV3(String url) {
+		List<String> result = new LinkedList<>();
+		if (StringUtils.isBlank(url)) {
+			return result;
+		}
+		String base = getBaseURL(url);
+		try
+		{
+			Document document = Jsoup.connect(url).get();
+			Elements links = document.select("a[href]");  
+			for (Element link : links) 
+			{
 
-	public static List<PageLink> extractLinks(String url) {
-		List<PageLink> result = new LinkedList<>();
+				String href=link.attr("href");
+				String absUrl=ExtractUtils.getAbsUrl(base, href);
+				if(StringUtils.isNotBlank(absUrl)) {
+					result.add(absUrl);
+				}
+			}
+			links = document.select("frame[src]");  
+			for (Element link : links) 
+			{
+
+				String href=link.attr("src");
+				String absUrl=ExtractUtils.getAbsUrl(base, href);
+				if(StringUtils.isNotBlank(absUrl)) {
+					result.add(absUrl);
+				}
+			}
+			links = document.select("iframe[src]");  
+			for (Element link : links) 
+			{
+
+				String href=link.attr("src");
+				String absUrl=ExtractUtils.getAbsUrl(base, href);
+				if(StringUtils.isNotBlank(absUrl)) {
+					result.add(absUrl);
+				}
+			}
+		}catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
+	public static List<PageLink1> extractLinks(String url) {
+		List<PageLink1> result = new LinkedList<>();
 		if (StringUtils.isBlank(url)) {
 			return result;
 		}
 		String base = getBaseURL(url);
 
-		HtmlUnitDriver driver = new HtmlUnitDriver();
-		driver.setJavascriptEnabled(true);
-		driver.get(url);
-		List<WebElement> webElements = driver.findElementsByTagName("link");
-		System.out.println("--------------link------------------------");
-		List<PageLink> cssList = getAddUrl(webElements, PageTypeEnum.CSS.getPageType(), base, url);
-		webElements = driver.findElementsByTagName("script");
-		System.out.println("--------------script------------------------");
-		List<PageLink> jsList = getAddUrl(webElements, PageTypeEnum.JS.getPageType(), base, url);
-		webElements = driver.findElementsByTagName("img");
-		System.out.println("--------------img------------------------");
-		List<PageLink> imgList = getAddUrl(webElements, PageTypeEnum.IMG.getPageType(), base, url);
-		webElements = driver.findElementsByTagName("a");
-		System.out.println("--------------a------------------------");
-		List<PageLink> htmlList = getAddUrl(webElements, PageTypeEnum.HTML.getPageType(), base, url);
-		result.addAll(cssList);
-		result.addAll(jsList);
-		result.addAll(imgList);
-		// 检查页面是否是有写死的http资源
-		List<PageLink> httpAbs = new LinkedList();
-		for ( PageLink p : result) {
-			if (p.getLinkUrl() != null && p.getLinkUrl().startsWith("http://")
-					&& (p.getAutoAdapt() == null || p.getAutoAdapt() == 0)) {
-				httpAbs.add(p);
+		try
+		{
+			Document document = Jsoup.connect(url).get();
+			Elements links = document.select("link[href]");  
+			System.out.println("--------------link------------------------");
+			List<PageLink1> cssList = getAddUrl(links, PageTypeEnum.CSS.getPageType(), base, url);
+			links = document.select("script[src]");  
+			System.out.println("--------------script------------------------");
+			List<PageLink1> jsList = getAddUrl(links, PageTypeEnum.JS.getPageType(), base, url);
+			links = document.select("img[src]");  
+			System.out.println("--------------img------------------------");
+			List<PageLink1> imgList = getAddUrl(links, PageTypeEnum.IMG.getPageType(), base, url);
+			links = document.select("a[href]");  
+			System.out.println("--------------a------------------------");
+			List<PageLink1> htmlList = getAddUrl(links, PageTypeEnum.HTML.getPageType(), base, url);
+			result.addAll(cssList);
+			result.addAll(jsList);
+			result.addAll(imgList);
+			// 检查页面是否是有写死的http资源
+			List<PageLink1> httpAbs = new LinkedList();
+			for ( PageLink1 p : result) {
+				if (p.getLinkUrl() != null && p.getLinkUrl().startsWith("http://")
+						&& (p.getAutoAdapt() == null || p.getAutoAdapt() == 0)) {
+					httpAbs.add(p);
+				}
 			}
-		}
-		for(PageLink http:httpAbs) {
-			protocalCheckExecutor.submit(new HostProtocalCheck(http));
-		}
-		result.addAll(htmlList);
-		PageLink p = new PageLink();
-		p.setAutoAdapt(0);
-		p.setLinkUrl(url);
-		p.setPageType(PageTypeEnum.HTML.getPageType());
-		if (!httpAbs.isEmpty()) {
-			p.setHttpExist(1);
-			String s = joinHttpUrls(httpAbs);
-			p.setHttpExistContent(StringUtils.abbreviate(s, MAX_INFOSIZE));
+			result.addAll(htmlList);
+			PageLink1 p = new PageLink1();
+			p.setAutoAdapt(0);
+			p.setLinkUrl(url);
+			p.setPageType(PageTypeEnum.HTML.getPageType());
+			if (!httpAbs.isEmpty()) {
+				p.setHttpExist(1);
+				String s = joinHttpUrls(httpAbs);
+				p.setHttpExistContent(StringUtils.abbreviate(s, MAX_INFOSIZE));
 
-		} else {
-			p.setHttpExist(0);
+			} else {
+				p.setHttpExist(0);
+			}
+			result.add(p);
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
 		}
-		result.add(p);
-
 		return result;
 	}
 }
