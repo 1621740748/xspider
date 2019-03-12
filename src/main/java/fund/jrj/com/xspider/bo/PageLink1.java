@@ -14,7 +14,6 @@ public class PageLink1 {
     private Integer pageType;
     private Integer autoAdapt;
     private Integer httpExist;
-    private String httpExistContent;
 	public Integer getLinkId() {
 		return linkId;
 	}
@@ -44,12 +43,6 @@ public class PageLink1 {
 	}
 	public void setHttpExist(Integer httpExist) {
 		this.httpExist = httpExist;
-	}
-	public String getHttpExistContent() {
-		return httpExistContent;
-	}
-	public void setHttpExistContent(String httpExistContent) {
-		this.httpExistContent = httpExistContent;
 	}
 	public Integer getAutoAdapt() {
 		return autoAdapt;

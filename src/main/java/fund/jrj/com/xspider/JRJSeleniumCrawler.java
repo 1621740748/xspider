@@ -68,7 +68,6 @@ public class JRJSeleniumCrawler {
                 			next.add(pl.getLinkUrl());
                 		}
                 	}
-        			String host = ExtractUtils.getHost(pl.getLinkUrl());
         			//检查资源是否包含http写死的情况
         			if (
         					pl.getPageType()==PageTypeEnum.JS.getPageType()) {

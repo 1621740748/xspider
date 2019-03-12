@@ -26,28 +26,28 @@ public class JSCSSContainHostProcess {
 		}
 		return result;
 	}
-	public static void main(String[] args) {
-		PageLink1Dao plDao=DBUtils.getInstance().create(PageLink1Dao.class);
-		List<PageLink1> pls=plDao.selectHttpExists();
-		List<JscssContains> result=new LinkedList<>();
-		JscssContainsDao jDao=DBUtils.getInstance().create(JscssContainsDao.class);
-		int i=0;
-		for(PageLink1 p:pls) {
-			JscssContains jc=new JscssContains();
-			List<String> hosts=extractHosts(p.getHttpExistContent());
-			for(String host:hosts) {
-				jc.setContainHost(host);
-				jc.setUrl(p.getLinkUrl());
-				result.add(jc);
-				i++;
-				if(i%1000==1) {
-					jDao.add(result);
-					result.clear();
-				}
-			}
-		}
-		jDao.add(result);
-
-	}
+//	public static void main(String[] args) {
+//		PageLink1Dao plDao=DBUtils.getInstance().create(PageLink1Dao.class);
+//		List<PageLink1> pls=plDao.selectHttpExists();
+//		List<JscssContains> result=new LinkedList<>();
+//		JscssContainsDao jDao=DBUtils.getInstance().create(JscssContainsDao.class);
+//		int i=0;
+//		for(PageLink1 p:pls) {
+//			JscssContains jc=new JscssContains();
+//			List<String> hosts=extractHosts(p.getHttpExistContent());
+//			for(String host:hosts) {
+//				jc.setContainHost(host);
+//				jc.setUrl(p.getLinkUrl());
+//				result.add(jc);
+//				i++;
+//				if(i%1000==1) {
+//					jDao.add(result);
+//					result.clear();
+//				}
+//			}
+//		}
+//		jDao.add(result);
+//
+//	}
 
 }

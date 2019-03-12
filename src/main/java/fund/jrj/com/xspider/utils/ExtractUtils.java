@@ -17,8 +17,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import com.alibaba.fastjson.JSON;
 
@@ -26,6 +24,7 @@ import fund.jrj.com.xspider.bo.HttpResources;
 import fund.jrj.com.xspider.bo.PageLink1;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
 import fund.jrj.com.xspider.dao.HttpResourcesDao;
+import fund.jrj.com.xspider.dao.PageLink1Dao;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -124,8 +123,11 @@ public class ExtractUtils {
 				continue;
 			}
 			p.setLinkUrl(linkUrl);
+			p.setLinkHost(ExtractUtils.getHost(linkUrl));
+			p.setLinkHostPath(ExtractUtils.getHostAndPath(linkUrl));
 			p.setLinkParentUrl(parentUrl);
-			p.setLinkHost(getHost(linkUrl));
+			p.setLinkParentHost(ExtractUtils.getHost(parentUrl));
+			p.setLinkParentHostPath(ExtractUtils.getHostAndPath(parentUrl));
 			System.out.println(linkUrl);
 			addList.add(p);
 		}
@@ -141,25 +143,26 @@ public class ExtractUtils {
 		return "";
 	}
 
-	private static boolean isJRJHost(String host) {
-		if (host.endsWith(".jrj.com.cn") || host.endsWith(".jrjimg.cn")) {
-			return true;
+	public static String getHostAndPath(String url) {
+		if (StringUtils.isBlank(url)) {
+			return "";
 		}
-		return false;
+		try {
+			URL u = new URL(url);
+			return u.getHost() + u.getPath();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 
-	private static String findHttpAbs(String body) {
+	private static List<String> findHttpAbs(String body) {
 		List<String> result = new LinkedList<>();
 		Matcher m = HTTPURL.matcher(body); // 操作的字符串
 		while (m.find()) {
 			result.add(m.group(1));
 		}
-		if (result.isEmpty()) {
-			return "";
-		} else {
-			String s = StringUtils.join(result, "\n");
-			return StringUtils.abbreviate(s, MAX_INFOSIZE);
-		}
+		return result;
 	}
 
 	/**
@@ -171,37 +174,57 @@ public class ExtractUtils {
 		// 检查是否已经分析过该资源
 		String value = RockUtils.get(pl.getLinkUrl());
 		if (StringUtils.isNotBlank(value)) {
-			PageLink1 temp = JSON.parseObject(value, PageLink1.class);
-			pl.setHttpExist(temp.getHttpExist());
-			pl.setHttpExistContent(temp.getHttpExistContent());
 			return;
 		}
-		// 检查http支持情况以及是否包含http写死的情况
-		OkhttpUtils.getInstance().doGet(pl.getLinkUrl(), new Callback() {
-			@Override
-			public void onFailure(Call call, IOException e) {
-			}
-
-			@Override
-			public void onResponse(Call call, Response response) throws IOException {
-				if (pl.getPageType() == PageTypeEnum.CSS.getPageType()
-						|| pl.getPageType() == PageTypeEnum.JS.getPageType()) {
-					String body = response.body().string();
-					String https = findHttpAbs(body);
-					if (StringUtils.isNotBlank(https)) {
-						pl.setHttpExist(1);
-						pl.setHttpExistContent(https);
-					} else {
-						pl.setHttpExist(0);
-						pl.setHttpExistContent("");
-
-					}
+		try {
+			// 检查http支持情况以及是否包含http写死的情况
+			OkhttpUtils.getInstance().doGet(pl.getLinkUrl(), new Callback() {
+				@Override
+				public void onFailure(Call call, IOException e) {
 				}
-				RockUtils.put(pl.getLinkUrl(), JSON.toJSONString(pl));
-				response.close();
-			}
 
-		});
+				@Override
+				public void onResponse(Call call, Response response) throws IOException {
+					if (pl.getPageType() == PageTypeEnum.CSS.getPageType()
+							|| pl.getPageType() == PageTypeEnum.JS.getPageType()) {
+						String body = response.body().string();
+						List<String> httpLinks = findHttpAbs(body);
+						if (httpLinks != null && httpLinks.size() > 0) {
+							List<PageLink1> jsLinks = new LinkedList<>();
+							for (String l : httpLinks) {
+								if (StringUtils.isBlank(l)) {
+									continue;
+								}
+								String host = ExtractUtils.getHost(l);
+								if (StringUtils.isBlank(host)) {
+									continue;
+								}
+								PageLink1 p = new PageLink1();
+								p.setAutoAdapt(0);
+								p.setHttpExist(1);
+								p.setLinkUrl(l);
+								p.setPageType(PageTypeEnum.JS.getPageType());
+								p.setLinkHost(host);
+								p.setLinkHostPath(ExtractUtils.getHostAndPath(l));
+								p.setLinkParentHost(ExtractUtils.getHost(pl.getLinkUrl()));
+								p.setLinkParentHostPath(ExtractUtils.getHostAndPath(pl.getLinkUrl()));
+								p.setLinkParentUrl(pl.getLinkUrl());
+								jsLinks.add(p);
+							}
+							if (!jsLinks.isEmpty()) {
+								PageLink1Dao plDao = DBUtils.getInstance().create(PageLink1Dao.class);
+								plDao.add(jsLinks);
+							}
+						}
+					}
+					RockUtils.put(pl.getLinkUrl(), "1");
+					response.close();
+				}
+
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -214,51 +237,48 @@ public class ExtractUtils {
 		String result = r.toString();
 		return StringUtils.strip(result, "\n");
 	}
+
 	public static List<String> extractLinksV3(String url) {
 		List<String> result = new LinkedList<>();
 		if (StringUtils.isBlank(url)) {
 			return result;
 		}
 		String base = getBaseURL(url);
-		try
-		{
+		try {
 			Document document = Jsoup.connect(url).get();
-			Elements links = document.select("a[href]");  
-			for (Element link : links) 
-			{
+			Elements links = document.select("a[href]");
+			for (Element link : links) {
 
-				String href=link.attr("href");
-				String absUrl=ExtractUtils.getAbsUrl(base, href);
-				if(StringUtils.isNotBlank(absUrl)) {
+				String href = link.attr("href");
+				String absUrl = ExtractUtils.getAbsUrl(base, href);
+				if (StringUtils.isNotBlank(absUrl)) {
 					result.add(absUrl);
 				}
 			}
-			links = document.select("frame[src]");  
-			for (Element link : links) 
-			{
+			links = document.select("frame[src]");
+			for (Element link : links) {
 
-				String href=link.attr("src");
-				String absUrl=ExtractUtils.getAbsUrl(base, href);
-				if(StringUtils.isNotBlank(absUrl)) {
+				String href = link.attr("src");
+				String absUrl = ExtractUtils.getAbsUrl(base, href);
+				if (StringUtils.isNotBlank(absUrl)) {
 					result.add(absUrl);
 				}
 			}
-			links = document.select("iframe[src]");  
-			for (Element link : links) 
-			{
+			links = document.select("iframe[src]");
+			for (Element link : links) {
 
-				String href=link.attr("src");
-				String absUrl=ExtractUtils.getAbsUrl(base, href);
-				if(StringUtils.isNotBlank(absUrl)) {
+				String href = link.attr("src");
+				String absUrl = ExtractUtils.getAbsUrl(base, href);
+				if (StringUtils.isNotBlank(absUrl)) {
 					result.add(absUrl);
 				}
 			}
-		}catch (Exception e) 
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
+
 	public static List<PageLink1> extractLinks(String url) {
 		List<PageLink1> result = new LinkedList<>();
 		if (StringUtils.isBlank(url)) {
@@ -266,47 +286,33 @@ public class ExtractUtils {
 		}
 		String base = getBaseURL(url);
 
-		try
-		{
+		try {
 			Document document = Jsoup.connect(url).get();
-			Elements links = document.select("link[href]");  
+			Elements links = document.select("link[href]");
 			System.out.println("--------------link------------------------");
 			List<PageLink1> cssList = getAddUrl(links, PageTypeEnum.CSS.getPageType(), base, url);
-			links = document.select("script[src]");  
+			links = document.select("script[src]");
 			System.out.println("--------------script------------------------");
 			List<PageLink1> jsList = getAddUrl(links, PageTypeEnum.JS.getPageType(), base, url);
-			links = document.select("img[src]");  
+			links = document.select("img[src]");
 			System.out.println("--------------img------------------------");
 			List<PageLink1> imgList = getAddUrl(links, PageTypeEnum.IMG.getPageType(), base, url);
-			links = document.select("a[href]");  
+			links = document.select("a[href]");
 			System.out.println("--------------a------------------------");
 			List<PageLink1> htmlList = getAddUrl(links, PageTypeEnum.HTML.getPageType(), base, url);
 			result.addAll(cssList);
 			result.addAll(jsList);
 			result.addAll(imgList);
 			// 检查页面是否是有写死的http资源
-			List<PageLink1> httpAbs = new LinkedList();
-			for ( PageLink1 p : result) {
+			for (PageLink1 p : result) {
 				if (p.getLinkUrl() != null && p.getLinkUrl().startsWith("http://")
 						&& (p.getAutoAdapt() == null || p.getAutoAdapt() == 0)) {
-					httpAbs.add(p);
+					p.setHttpExist(1);
 				}
 			}
 			result.addAll(htmlList);
-			PageLink1 p = new PageLink1();
-			p.setAutoAdapt(0);
-			p.setLinkUrl(url);
-			p.setPageType(PageTypeEnum.HTML.getPageType());
-			if (!httpAbs.isEmpty()) {
-				p.setHttpExist(1);
-				String s = joinHttpUrls(httpAbs);
-				p.setHttpExistContent(StringUtils.abbreviate(s, MAX_INFOSIZE));
 
-			} else {
-				p.setHttpExist(0);
-			}
-			result.add(p);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 		return result;

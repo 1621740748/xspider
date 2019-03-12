@@ -1,12 +1,14 @@
-create table page_link(
+create table page_link1(
   link_id int auto_increment primary key comment '链接ID' ,
-  link_url varchar(256) comment '链接',
-  link_host varchar(128) comment '链接host',
-  link_parent_url varchar(256) comment '父链接',
+  link_url varchar(1024) comment '链接',
+  link_host varchar(256) comment '链接host',
+  link_host_path varchar(256) comment '链接hostpath',
+  link_parent_url varchar(1024) comment '父链接',
+  link_parent_host varchar(256) comment '父链接host',
+  link_parent_host_path varchar(256) comment '父链接hostpath',  
   page_type tinyint comment '页面类型 1、js 2、css 3、img 4、html',
   auto_adapt tinyint default 0 comment '是否自适应 0 否 1 是',
   http_exist tinyint default 0 comment '是否存在http内容',
-  http_exist_content varchar(2048) default '' comment 'http内容',
   create_time timestamp default CURRENT_TIMESTAMP comment '创建时间'
 );
 create table http_resources(
