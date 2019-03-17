@@ -49,8 +49,6 @@ public class JRJSeleniumCrawler {
   Logger logger = Logger.getLogger("com.gargoylesoftware.htmlunit");
   logger.setLevel(Level.OFF);
 }
-
-
     public static void main(String[] args) throws Exception {
         Executor executor = new Executor() {
             @Override

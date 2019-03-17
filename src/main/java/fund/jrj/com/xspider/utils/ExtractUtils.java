@@ -150,7 +150,34 @@ public class ExtractUtils {
 		}
 		return "";
 	}
+	private static Map<String,String> Split(String urlparam){
+		   Map<String,String> map = new HashMap<String,String>();
+		   if(StringUtils.isBlank(urlparam)) {
+			   return map;
+		   }
+		   String[] param =  urlparam.split("&");
+		   for(String keyvalue:param){
+		      String[] pair = keyvalue.split("=");
+		      if(pair.length==2){
+		         map.put(pair[0], pair[1]);
+		      }
+		   }
+		   return map;
+		}
 
+	public static Map<String,String> getParams(String url) {
+		Map<String,String> result=new HashMap<>();
+		if (StringUtils.isBlank(url)) {
+			return result;
+		}
+		try {
+			URL u = new URL(url);
+			return Split(u.getQuery());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 	private static List<String> findHttpAbs(String body) {
 		List<String> result = new LinkedList<>();
 		Matcher m = HTTPURL.matcher(body); // 操作的字符串
