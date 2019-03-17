@@ -94,7 +94,7 @@ public class JRJSeleniumCrawler {
         }
         crawler.setThreads(5);
         crawler.getConf().setExecuteInterval(200);
-        crawler.start(3);
+        crawler.start(5);
     }
 
 }
