@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,8 +15,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import com.alibaba.fastjson.JSON;
 
 import fund.jrj.com.xspider.bo.HttpResources;
 import fund.jrj.com.xspider.bo.PageLink1;
@@ -30,7 +26,6 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class ExtractUtils {
-	private static ExecutorService protocalCheckExecutor = Executors.newFixedThreadPool(2);
 	public static Map<String, Boolean> hostHttpsMap = new HashMap<>();
 	public static final Integer MAX_INFOSIZE = 2048;
 	public static Pattern HTTPURL = Pattern.compile("(http://(?:[a-z,A-Z,0-9]+\\.){1,6}[^\"\'\\s]+)"); // 正则表达式
@@ -39,9 +34,9 @@ public class ExtractUtils {
 		try {
 			URL u = new URL(url);
 			String base = u.getProtocol() + "://" + u.getHost();
-			if (u.getPort() != 80 && u.getProtocol().equals("http")) {
+			if (u.getPort()!=-1&&u.getPort() != 80 && u.getProtocol().equals("http")) {
 				base = base + ":" + u.getPort();
-			} else if (443 != u.getPort() && u.getProtocol().equals("https")) {
+			} else if (u.getPort()!=-1&&443 != u.getPort() && u.getProtocol().equals("https")) {
 				base = base + ":" + u.getPort();
 			}
 			return base;
@@ -149,7 +144,7 @@ public class ExtractUtils {
 		}
 		try {
 			URL u = new URL(url);
-			return u.getHost() + u.getPath();
+			return u.getProtocol()+"://"+u.getHost()+((u.getDefaultPort()==u.getPort()||u.getPort()==-1)?"":":"+u.getPort())+u.getPath();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
