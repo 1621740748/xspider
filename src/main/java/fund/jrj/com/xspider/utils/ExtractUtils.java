@@ -25,9 +25,9 @@ public class ExtractUtils {
 		try {
 			URL u = new URL(url);
 			String base = u.getProtocol() + "://" + u.getHost();
-			if (u.getPort() != 80 && u.getProtocol().equals("http")) {
+			if (u.getPort()!=-1&&u.getPort() != 80 && u.getProtocol().equals("http")) {
 				base = base + ":" + u.getPort();
-			} else if (443 != u.getPort() && u.getProtocol().equals("https")) {
+			} else if (u.getPort()!=-1&&443 != u.getPort() && u.getProtocol().equals("https")) {
 				base = base + ":" + u.getPort();
 			}
 			return base;
