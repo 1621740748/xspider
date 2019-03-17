@@ -28,12 +28,14 @@ import org.apache.log4j.Logger;
 import cn.edu.hfut.dmic.webcollector.crawldb.DBManager;
 import cn.edu.hfut.dmic.webcollector.crawler.Crawler;
 import cn.edu.hfut.dmic.webcollector.fetcher.Executor;
+import cn.edu.hfut.dmic.webcollector.fetcher.NextFilter;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatum;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
 import fund.jrj.com.xspider.bo.PageLink1;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
 import fund.jrj.com.xspider.dao.PageLink1Dao;
+import fund.jrj.com.xspider.filter.JRJNextFilter;
 import fund.jrj.com.xspider.utils.DBUtils;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 
@@ -77,6 +79,7 @@ public class JRJSeleniumCrawler {
             	plDao.add(links);
             }
         };
+        NextFilter filter=new JRJNextFilter();
         //创建一个基于伯克利DB的DBManager
         DBManager manager = new RocksDBManager("crawl");
         
@@ -90,6 +93,7 @@ public class JRJSeleniumCrawler {
         		crawler.addSeed(seed);
         	}
         }
+        crawler.setNextFilter(filter);
         crawler.setThreads(5);
         crawler.getConf().setExecuteInterval(200);
         crawler.start(5);
