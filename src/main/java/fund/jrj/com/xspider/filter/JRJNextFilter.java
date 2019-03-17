@@ -28,7 +28,6 @@ public class JRJNextFilter  implements NextFilter {
         		return null;
         	}else {
         		boolean ok=false;
-        		boolean oneOk=true;
         		Map<String,Set<String>> store=items.get(path);
         		if(store==null) {
         			store=new ConcurrentHashMap<>();
@@ -57,7 +56,7 @@ public class JRJNextFilter  implements NextFilter {
         	}else {
         		ConcurrentHashMap<String,Set<String>> item=new ConcurrentHashMap<>();
         		params.forEach((key,value)->{
-        			Set s=new HashSet();
+        			Set<String> s=new HashSet<>();
         			s.add(value);
         			item.putIfAbsent(key, s);
         		});
