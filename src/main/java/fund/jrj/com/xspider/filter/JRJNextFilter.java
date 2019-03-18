@@ -70,9 +70,9 @@ public class JRJNextFilter  implements NextFilter {
         		}
         	}
         } else {
-        	Map<String,String> params=ExtractUtils.getParams(url);
+        	Map<String,String> params=rmDuplicateUtil.getParamsIncludePathariable(url);
         	if(params.isEmpty()) {
-        		items.put(pathRule, null);
+        		items.put(pathRule, new ConcurrentHashMap<>());
         	}else {
         		ConcurrentHashMap<String,Set<String>> item=new ConcurrentHashMap<>();
         		params.forEach((key,value)->{

@@ -85,7 +85,7 @@ public class JRJSeleniumCrawler {
         
         //创建一个Crawler需要有DBManager和Executor
         List<String> seeds= FileUtils.readLines(
-        		new File(JRJSeleniumCrawler.class.getResource("").getPath()+"fund_seed2.txt")
+        		new File(JRJSeleniumCrawler.class.getResource("").getPath()+"fund_seed.txt")
         		,"utf-8");
         Crawler crawler = new Crawler(manager, executor);
         for(String seed:seeds) {
@@ -96,7 +96,7 @@ public class JRJSeleniumCrawler {
         crawler.setNextFilter(filter);
         crawler.setThreads(5);
         crawler.getConf().setExecuteInterval(200);
-        crawler.start(5);
+        crawler.start(6);
     }
 
 }
