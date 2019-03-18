@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -64,7 +65,7 @@ public class RemoveDuplicateUtils {
 		String rule=temp.toString();	
 		return rule;
 	}
-	public  String toParamsRule(String urlpath) {
+	public  String getPathVariableRule(String urlpath) {
 		List<String> fs=this.split(urlpath);
 		StringBuilder temp =new StringBuilder();
 		int count=0;
@@ -85,15 +86,13 @@ public class RemoveDuplicateUtils {
 		String rule=temp.toString();	
 		return rule;
 	}
-	public  Map<String,String> toParamsMap(String urlpath) {
+	public  Map<String,String> getPathVariableMap(String urlpath) {
 		List<String> fs=this.split(urlpath);
 		Map<String,String> result=new HashMap<>();
 		int count=0;
 		for(String s:fs) {
-			boolean find=false;
 			for(String rr:this.replaceRules)	{
 				if(s.matches(rr)) {
-					find=true;
 					count++;
 					result.put(String.valueOf(count), s);
 				}
@@ -101,6 +100,18 @@ public class RemoveDuplicateUtils {
 		}
 		return result;
 		
+	}
+	public  Map<String,String> getParamsIncludePathariable(String url) {
+		Map<String,String> result=new HashMap<>();
+		if (StringUtils.isBlank(url)) {
+			return result;
+		}
+		Map<String,String> params=ExtractUtils.getParams(url);
+		result.putAll(params);
+		String path=ExtractUtils.getHostAndPath(url);
+		Map<String,String> variables=this.getPathVariableMap(path);
+		result.putAll(variables);
+		return result;
 	}
 	public  List<String> tidyByRules(List<String>files){
 		Map<String,String>uses=new HashMap<>();
