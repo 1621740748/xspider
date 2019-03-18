@@ -99,6 +99,7 @@ public class RemoveDuplicateUtils {
 				}
 			}
 		}
+		return result;
 		
 	}
 	public  List<String> tidyByRules(List<String>files){
