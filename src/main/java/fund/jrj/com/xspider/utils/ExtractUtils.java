@@ -226,7 +226,7 @@ public class ExtractUtils {
 								p.setAutoAdapt(0);
 								p.setHttpExist(1);
 								p.setLinkUrl(l);
-								p.setPageType(PageTypeEnum.JS.getPageType());
+								p.setPageType(PageTypeEnum.JSINJS.getPageType());
 								p.setLinkHost(host);
 								p.setLinkHostPath(ExtractUtils.getHostAndPath(l));
 								p.setLinkParentHost(ExtractUtils.getHost(pl.getLinkUrl()));

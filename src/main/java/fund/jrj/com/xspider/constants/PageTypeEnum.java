@@ -1,7 +1,7 @@
 package fund.jrj.com.xspider.constants;
 
 public enum PageTypeEnum {
-	JS(1),CSS(2),IMG(3),HTML(4);
+	JS(1),CSS(2),IMG(3),HTML(4),JSINJS(5);
 	private Integer pageType;
 	private PageTypeEnum(Integer pageType) {
 		this.setPageType(pageType);
