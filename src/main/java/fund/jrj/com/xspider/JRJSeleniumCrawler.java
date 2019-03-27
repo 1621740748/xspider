@@ -60,7 +60,8 @@ public class JRJSeleniumCrawler {
             	}
                 List<PageLink1> links=ExtractUtils.extractLinks(datum.url());
                 for(PageLink1 pl:links) {
-                	if(pl.getPageType()==PageTypeEnum.HTML.getPageType()) {
+                	if(pl.getPageType()==PageTypeEnum.HTML.getPageType()
+                			||pl.getPageType()==PageTypeEnum.IFRAME.getPageType()) {
                 		if(pl.getLinkUrl().startsWith("http://fund.jrj.com.cn")
                 			&&StringUtils.isNotBlank(pl.getLinkParentUrl())
                 			&&!pl.getLinkUrl().toLowerCase().endsWith(".pdf")

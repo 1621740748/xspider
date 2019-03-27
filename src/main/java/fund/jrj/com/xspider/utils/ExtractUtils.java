@@ -105,7 +105,10 @@ public class ExtractUtils {
 			String u = null;
 			if (pageType == PageTypeEnum.CSS.getPageType() || pageType == PageTypeEnum.HTML.getPageType()) {
 				u = we.attr("href");
-			} else if (pageType == PageTypeEnum.JS.getPageType() || pageType == PageTypeEnum.IMG.getPageType()) {
+			} else if (pageType == PageTypeEnum.JS.getPageType() 
+					|| pageType == PageTypeEnum.IMG.getPageType()
+					|| pageType == PageTypeEnum.IFRAME.getPageType()
+					) {
 				u = we.attr("src");
 			}
 			if (u != null && u.startsWith("//")) {
@@ -323,6 +326,9 @@ public class ExtractUtils {
 			links = document.select("a[href]");
 			System.out.println("--------------a------------------------");
 			List<PageLink1> htmlList = getAddUrl(links, PageTypeEnum.HTML.getPageType(), base, url);
+			System.out.println("--------------iframe------------------------");
+			links = document.select("iframe[src]");
+			List<PageLink1> iframeList = getAddUrl(links, PageTypeEnum.IFRAME.getPageType(), base, url);
 			result.addAll(cssList);
 			result.addAll(jsList);
 			result.addAll(imgList);
@@ -334,7 +340,7 @@ public class ExtractUtils {
 				}
 			}
 			result.addAll(htmlList);
-
+            result.addAll(iframeList);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
