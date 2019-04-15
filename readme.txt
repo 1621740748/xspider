@@ -19,3 +19,4 @@ create table page_js select  p.link_host_path as js ,any_value(p.link_parent_url
  select distinct link_host_path from page_link1 where page_type in (1,2) and http_exist=1 order by link_host_path;
  
  
+ 
