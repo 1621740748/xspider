@@ -20,7 +20,7 @@ package fund.jrj.com.xspider;
 import java.io.File;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -85,8 +85,8 @@ public class JRJSeleniumCrawler {
         DBManager manager = new RocksDBManager("crawl");
         
         //创建一个Crawler需要有DBManager和Executor
-        List<String> seeds= FileUtils.readLines(
-        		new File(JRJSeleniumCrawler.class.getResource("").getPath()+"fund_seed.txt")
+        List<String> seeds= IOUtils.readLines(
+        		JRJSeleniumCrawler.class.getResource("/fund_seed.txt").openStream()
         		,"utf-8");
         Crawler crawler = new Crawler(manager, executor);
         for(String seed:seeds) {
