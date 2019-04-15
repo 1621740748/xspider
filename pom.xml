@@ -86,7 +86,7 @@
 								</copy>
 
 								<zip basedir="${project.build.directory}/bin"
-									destfile="./webcollector-${project.version}-bin.zip" />
+									destfile="./xspider-${project.version}-bin.zip" />
 							</tasks>
 						</configuration>
 						<goals>
