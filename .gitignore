@@ -2,6 +2,7 @@ target/
 crawl/
 cache/
 jscss/
+dbs/
 .classpath
 .project
 .settings/
