@@ -80,6 +80,7 @@ public class JRJNextFilter  implements NextFilter {
         			s.add(value);
         			item.putIfAbsent(key, s);
         		});
+        		items.put(pathRule, item);
         	}
             return nextItem;
         }
