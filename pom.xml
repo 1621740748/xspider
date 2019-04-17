@@ -92,6 +92,10 @@
 										<include name="*.sh" />
 										<include name="*.bat" />
 									</fileset>
+									<fileset dir="${project.build.directory}/classes">
+										<include name="*.sh" />
+										<include name="*.bat" />
+									</fileset>
 								</copy>
 
 								<zip basedir="${project.build.directory}/bin"
