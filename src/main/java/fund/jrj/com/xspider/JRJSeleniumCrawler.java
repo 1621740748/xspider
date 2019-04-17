@@ -52,7 +52,10 @@ public class JRJSeleniumCrawler {
   logger.setLevel(Level.OFF);
 }
     public static void main(String[] args) throws Exception {
-        Executor executor = new Executor() {
+       	String scanUrl=args[0];
+    	String hostSingleName=ExtractUtils.getHostSingleName(scanUrl);
+    	DBUtils.createTable(hostSingleName);
+    	Executor executor = new Executor() {
             @Override
             public void execute(CrawlDatum datum, CrawlDatums next) throws Exception {
             	if(datum==null||datum.url()==null) {
@@ -62,7 +65,7 @@ public class JRJSeleniumCrawler {
                 for(PageLink1 pl:links) {
                 	if(pl.getPageType()==PageTypeEnum.HTML.getPageType()
                 			||pl.getPageType()==PageTypeEnum.IFRAME.getPageType()) {
-                		if(pl.getLinkUrl().startsWith("http://stock.jrj.com.cn")
+                		if(pl.getLinkUrl().startsWith(scanUrl)
                 			&&StringUtils.isNotBlank(pl.getLinkParentUrl())
                 			&&!pl.getLinkUrl().toLowerCase().endsWith(".pdf")
                 			&&!pl.getLinkUrl().toLowerCase().endsWith(".mp4")) {
@@ -73,11 +76,13 @@ public class JRJSeleniumCrawler {
         			if (
         					pl.getPageType()==PageTypeEnum.JS.getPageType()) {
         	
-        				ExtractUtils.checkJscssExistHttp(pl);
+        				ExtractUtils.checkJscssExistHttp(pl,hostSingleName);
         			}
                 }
             	PageLink1Dao plDao=DBUtils.getInstance().create(PageLink1Dao.class);
-            	plDao.add(links);
+            	for(PageLink1 l:links) {
+            		plDao.add(l,hostSingleName);
+            	}
             }
         };
         NextFilter filter=new JRJNextFilter();
@@ -93,6 +98,9 @@ public class JRJSeleniumCrawler {
         	if(StringUtils.isNotBlank(seed)) {
         		crawler.addSeed(seed);
         	}
+        }
+        if(!seeds.contains(scanUrl)) {
+        	crawler.addSeed(scanUrl);
         }
         crawler.setNextFilter(filter);
         crawler.setThreads(5);

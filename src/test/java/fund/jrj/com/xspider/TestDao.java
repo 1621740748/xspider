@@ -12,7 +12,7 @@ public class TestDao {
 		PageLink1 p=new PageLink1();
 		p.setLinkUrl("https://www.baidu.com");
 		p.setPageType(PageTypeEnum.HTML.getPageType());
-		plDao.add(p);
+		plDao.add(p,"www.baidu.com");
 	}
 
 }

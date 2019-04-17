@@ -140,7 +140,16 @@ public class ExtractUtils {
 		}
 		return "";
 	}
-
+	public static String getHostSingleName(String url) {
+		try {
+			String host= new URL(url).getHost();
+			String name=StringUtils.substringBefore(host, ".");
+			return name;
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 	public static String getHostAndPath(String url) {
 		if (StringUtils.isBlank(url)) {
 			return "";
@@ -196,7 +205,7 @@ public class ExtractUtils {
 	 * 
 	 * @param pl
 	 */
-	public static void checkJscssExistHttp(final PageLink1 pl) {
+	public static void checkJscssExistHttp(final PageLink1 pl,String hostSingleName) {
 		// 检查是否已经分析过该资源
 		String value = RockUtils.get(pl.getLinkUrl());
 		if (StringUtils.isNotBlank(value)) {
@@ -239,7 +248,9 @@ public class ExtractUtils {
 							}
 							if (!jsLinks.isEmpty()) {
 								PageLink1Dao plDao = DBUtils.getInstance().create(PageLink1Dao.class);
-								plDao.add(jsLinks);
+								for(PageLink1 js:jsLinks) {
+									plDao.add(js,hostSingleName);
+								}
 							}
 						}
 					}

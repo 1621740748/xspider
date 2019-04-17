@@ -1,15 +1,19 @@
 package fund.jrj.com.xspider.dao;
 
-import java.util.List;
-
 import org.jfaster.mango.annotation.DB;
 import org.jfaster.mango.annotation.SQL;
-import org.jfaster.mango.crud.CrudDao;
 
 import fund.jrj.com.xspider.bo.PageLink1;
 
-@DB(table = "page_link1")
-public interface PageLink1Dao extends CrudDao<PageLink1, Integer> {
-	@SQL("select * from page_link1 where http_exist=1 and page_type in(1,2,3)")
-	List<PageLink1> selectHttpExists();
+@DB
+public interface PageLink1Dao {
+	@SQL("insert into page_link1_#{:2} "
+			+ "(link_url ,link_host ,link_host_path ,link_parent_url "
+			+ ",link_parent_host ,link_parent_host_path "
+			+ ",page_type ,auto_adapt ,http_exist ) "
+			+ "values(:1.linkUrl ,:1.linkHost ,:1.linkHostPath ,:1.linkParentUrl " + 
+			"	,:1.linkParentHost ,:1.linkParentHostPath" + 
+			",:1.pageType ,:1.autoAdapt ,:1.httpExist )")
+	void add(PageLink1 p,String host);
+
 }
