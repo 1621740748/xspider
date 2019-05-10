@@ -10,7 +10,7 @@ create table page_js select  p.link_host_path as js ,any_value(p.link_parent_url
  4、复制典型页面的内容到xcheck项目的seeds.txt 并且替换链接为https协议，运行xcheck项目
  
  5、得到需要修改的结果在 blocked_resources表中
-   select distinct initiate_url  from blocked_resources  where initiate_url like '%.js' order by initiate_url;
+   select distinct initiate_url  from blocked_resources  where initiate_url like '%.js%' order by initiate_url;
 
 6、得到被blocked的请求 
  select distinct res_host_path from blocked_resources where initiate_url not like '%.html' order by res_host_path ;
