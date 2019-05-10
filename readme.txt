@@ -11,7 +11,9 @@ create table page_js select  p.link_host_path as js ,any_value(p.link_parent_url
  
  5、得到需要修改的结果在 blocked_resources表中
    select distinct initiate_url  from blocked_resources  where initiate_url like '%.js%' order by initiate_url;
-
+  修改得到的js文件中的被block的http js地址
+  重复步骤4、 5直到没有被block的js
+  
 6、得到被blocked的请求 
  select distinct res_host_path from blocked_resources where initiate_url not like '%.html' order by res_host_path ;
  
