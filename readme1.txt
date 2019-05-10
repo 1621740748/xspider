@@ -6,3 +6,6 @@
   select distinct  link_host_path from  page_link1 where page_type in(6) and link_host_path not like '%.shtml' order by link_host_path ;
  4、查询js中使用的链接 
   select distinct  link_host_path from  page_link1 where page_type in(5) and link_host_path not like '%.shtml' order by link_host_path ;
+  
+   替换诊断问题抓包命令举例
+   ngrep -Wbyline port 80 -d wlo1 |grep "/head.js" -C 300

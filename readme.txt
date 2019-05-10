@@ -22,3 +22,4 @@ create table page_js select  p.link_host_path as js ,any_value(p.link_parent_url
  
  
  
+ 
