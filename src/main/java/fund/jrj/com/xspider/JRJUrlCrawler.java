@@ -17,14 +17,8 @@
  */
 package fund.jrj.com.xspider;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -45,9 +39,7 @@ import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.RocksDBManager;
 import fund.jrj.com.xspider.bo.PageLink1;
 import fund.jrj.com.xspider.constants.PageTypeEnum;
-import fund.jrj.com.xspider.dao.PageLink1Dao;
 import fund.jrj.com.xspider.filter.JRJNextFilter;
-import fund.jrj.com.xspider.utils.DBUtils;
 import fund.jrj.com.xspider.utils.ExtractUtils;
 
 
