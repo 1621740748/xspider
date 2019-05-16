@@ -126,7 +126,7 @@ public class ExtractUtils {
 			p.setLinkParentUrl(parentUrl);
 			p.setLinkParentHost(ExtractUtils.getHost(parentUrl));
 			p.setLinkParentHostPath(ExtractUtils.getHostAndPath(parentUrl));
-			System.out.println(linkUrl);
+		//	System.out.println(linkUrl);
 			addList.add(p);
 		}
 		return addList;
@@ -324,7 +324,7 @@ public class ExtractUtils {
 		String base = getBaseURL(url);
 
 		try {
-			Document document = Jsoup.connect(url).get();
+			Document document = Jsoup.connect(url).validateTLSCertificates(false).get();
 			Elements links = document.select("link[href]");
 			System.out.println("--------------link------------------------");
 			List<PageLink1> cssList = getAddUrl(links, PageTypeEnum.CSS.getPageType(), base, url);
